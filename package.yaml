@@ -1,0 +1,51 @@
+name: CodeMonad
+version: 0.1.0.0
+github: "githubuser/CodeMonad"
+license: BSD3
+author: "Karl Wang"
+maintainer: "kwkarlwang@gmail.com"
+copyright: "2021 Karl Wang"
+
+extra-source-files:
+  - README.md
+  - ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description: Please see the README on GitHub at <https://github.com/githubuser/CodeMonad#readme>
+
+dependencies:
+  - base >= 4.7 && < 5
+  - req == 3.9.2
+  - aeson == 2.0.1.0
+  - bytestring == 0.10.12.0
+
+library:
+  source-dirs: src
+
+executables:
+  CodeMonad-exe:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - CodeMonad
+
+tests:
+  CodeMonad-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - CodeMonad
