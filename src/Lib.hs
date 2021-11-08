@@ -27,8 +27,9 @@ getUserInfo =
   req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse headers
   where
     payload = object ["query" .= intercalate "\n" ["{", "  user {", "    username", "    isCurrentUserPremium", "  }", "}"]]
-    headersMap = [("Referer", "https://leetcode.com"), ("Origin", "https://leetcode.com")]
-    headers = makeHeaders headersMap <> getCredentials
+    -- headersMap = [("Referer", "https://leetcode.com"), ("Origin", "https://leetcode.com")]
+    -- headers = makeHeaders headersMap <> getCredentials
+    headers = getCredentials
 
 getCategoryProblems :: (MonadHttp m, FromJSON a) => m (JsonResponse a)
 getCategoryProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse headers
@@ -42,5 +43,6 @@ getCategoryProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "a
 
 someFunc :: IO ()
 someFunc = runReq defaultHttpConfig $ do
-  r <- getCategoryProblems
+  -- r <- getCategoryProblems
+  r <- getUserInfo
   liftIO $ print (responseBody r :: Value)

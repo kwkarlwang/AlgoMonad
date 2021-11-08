@@ -1,1 +1,1 @@
-# CodeMonad
+# AlgoMonad

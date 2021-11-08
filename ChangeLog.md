@@ -1,3 +1,3 @@
-# Changelog for CodeMonad
+# Changelog for AlgoMonad
 
 ## Unreleased changes
