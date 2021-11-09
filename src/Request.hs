@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib where
+module Request where
 
-import Control.Monad.IO.Class
+import Brick (Widget)
+import Control.Lens hiding ((.=))
 import Data.Aeson
+import Data.Aeson.Lens
 import Data.ByteString (ByteString)
 import Data.List (intercalate)
-import Data.String (IsString (fromString))
-import Debug.Trace (traceM)
 import Network.HTTP.Req
 
 csrfToken :: ByteString
@@ -22,7 +22,7 @@ getCredentials = header "Cookie" $ "csrftoken=" <> csrfToken <> ";LEETCODE_SESSI
 makeHeaders :: [(ByteString, ByteString)] -> Option scheme
 makeHeaders = foldr (\(x, y) b -> header x y <> b) mempty
 
-getUserInfo :: (MonadHttp m, FromJSON a) => m (JsonResponse a)
+getUserInfo :: (FromJSON a) => Req (JsonResponse a)
 getUserInfo =
   req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse headers
   where
@@ -31,18 +31,17 @@ getUserInfo =
     -- headers = makeHeaders headersMap <> getCredentials
     headers = getCredentials
 
-getCategoryProblems :: (MonadHttp m, FromJSON a) => m (JsonResponse a)
+getCategoryProblems :: (FromJSON a) => Req (JsonResponse a)
 getCategoryProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse headers
   where
-    -- headersMap =
-    --   [ ("X-CSRFToken", csrfToken),
-    --     ("X-Requested-With", "XMLHttpRequest")
-    --   ]
-    -- headers = makeHeaders headersMap <> getCredentials
     headers = getCredentials
 
-someFunc :: IO ()
-someFunc = runReq defaultHttpConfig $ do
-  -- r <- getCategoryProblems
-  r <- getUserInfo
-  liftIO $ print (responseBody r :: Value)
+getResponseBody :: Req (JsonResponse Value) -> IO Value
+getResponseBody request = do
+  r <- runReq defaultHttpConfig request
+  let res = responseBody r :: Value
+  maybeToIO $ res ^? key "data"
+
+maybeToIO :: Maybe Value -> IO Value
+maybeToIO Nothing = return $ Bool False
+maybeToIO (Just x) = return x

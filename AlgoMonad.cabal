@@ -7,8 +7,8 @@ cabal-version: 1.12
 name:           AlgoMonad
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/AlgoMonad#readme>
-homepage:       https://github.com/githubuser/AlgoMonad#readme
-bug-reports:    https://github.com/githubuser/AlgoMonad/issues
+homepage:       https://github.com/kwkarlwang/AlgoMonad#readme
+bug-reports:    https://github.com/kwkarlwang/AlgoMonad/issues
 author:         Karl Wang
 maintainer:     kwkarlwang@gmail.com
 copyright:      2021 Karl Wang
@@ -21,11 +21,12 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/AlgoMonad
+  location: https://github.com/kwkarlwang/AlgoMonad
 
 library
   exposed-modules:
-      Lib
+      Request
+      Screen
   other-modules:
       Paths_AlgoMonad
   hs-source-dirs:
@@ -33,11 +34,15 @@ library
   build-depends:
       aeson ==2.0.1.0
     , base >=4.7 && <5
+    , brick ==0.64.2
     , bytestring ==0.10.12.0
+    , lens ==4.19.2
+    , lens-aeson ==1.1.2
     , req ==3.9.2
+    , text ==1.2.4.1
   default-language: Haskell2010
 
-executable AlgoMonad-exe
+executable am
   main-is: Main.hs
   other-modules:
       Paths_AlgoMonad
@@ -48,8 +53,12 @@ executable AlgoMonad-exe
       AlgoMonad
     , aeson ==2.0.1.0
     , base >=4.7 && <5
+    , brick ==0.64.2
     , bytestring ==0.10.12.0
+    , lens ==4.19.2
+    , lens-aeson ==1.1.2
     , req ==3.9.2
+    , text ==1.2.4.1
   default-language: Haskell2010
 
 test-suite AlgoMonad-test
@@ -64,6 +73,10 @@ test-suite AlgoMonad-test
       AlgoMonad
     , aeson ==2.0.1.0
     , base >=4.7 && <5
+    , brick ==0.64.2
     , bytestring ==0.10.12.0
+    , lens ==4.19.2
+    , lens-aeson ==1.1.2
     , req ==3.9.2
+    , text ==1.2.4.1
   default-language: Haskell2010

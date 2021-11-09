@@ -1,6 +1,6 @@
 name: AlgoMonad
 version: 0.1.0.0
-github: "githubuser/AlgoMonad"
+github: "kwkarlwang/AlgoMonad"
 license: BSD3
 author: "Karl Wang"
 maintainer: "kwkarlwang@gmail.com"
@@ -24,12 +24,16 @@ dependencies:
   - req == 3.9.2
   - aeson == 2.0.1.0
   - bytestring == 0.10.12.0
+  - brick == 0.64.2
+  - lens-aeson == 1.1.2
+  - lens == 4.19.2
+  - text == 1.2.4.1
 
 library:
   source-dirs: src
 
 executables:
-  AlgoMonad-exe:
+  am:
     main: Main.hs
     source-dirs: app
     ghc-options:
