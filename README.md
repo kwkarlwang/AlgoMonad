@@ -16,4 +16,4 @@ The motivation to create this program is that LeetCode only allows the user to e
 ## Inspirations
 
 - [leetcode-cli](https://github.com/skygragon/leetcode-cli): Main source of inspiration. However, this is just a pure cli instead of a TUI. Implemented in javascript
-- [vscode-leetcode](https://github.com/LeetCode-OpenSource/vscode-leetcode): A TUI for LeetCode. However, only available on VSCode. Implemented in javascript.
+- [vscode-leetcode](https://github.com/LeetCode-OpenSource/vscode-leetcode): A GUI for LeetCode. However, only available on VSCode. Implemented in javascript.
