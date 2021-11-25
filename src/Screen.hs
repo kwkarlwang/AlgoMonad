@@ -2,7 +2,7 @@
 
 module Screen where
 
-import Brick
+import Brick (App (..), BrickEvent (VtyEvent), EventM, Next, ViewportType (Vertical), Widget, attrMap, bg, continue, defaultMain, halt, showFirstCursor, str, vBox, vScrollBy, viewport, viewportScroll, visible, withAttr)
 import Control.Lens hiding ((.=))
 import Control.Monad.IO.Class
 import Cursor.Simple.List.NonEmpty
@@ -26,7 +26,9 @@ tui = do
 data TuiState = TuiState {tuiStateUserInfo :: UserInfo, tuiStateProblems :: Problems, tuiRenderProblems :: NonEmptyCursor Problem}
   deriving (Show, Eq)
 
-type ResourceName = String
+type NewState = EventM ResourceName (Next TuiState)
+
+data ResourceName = Viewport1 deriving (Eq, Ord, Show)
 
 tuiApp :: App TuiState e ResourceName
 tuiApp =
@@ -53,15 +55,28 @@ buildInitialState =
               Just ne -> makeNonEmptyCursor ne
         }
 
+-- select direction
+type SelectF = NonEmptyCursor Problem -> Maybe (NonEmptyCursor Problem)
+
+down :: Int
+down = 1
+
+up :: Int
+up = -1
+
+select :: SelectF -> TuiState -> NewState
+select selectF s = case selectF . tuiRenderProblems $ s of
+  Nothing -> continue s
+  Just problems -> continue $ s {tuiRenderProblems = problems}
+
 drawTui :: TuiState -> [Widget ResourceName]
--- drawTui ts = [vBox $ map (str . uncurry (++)) $ tuiStateUserInfo ts]
 drawTui ts =
   let renderProblem = \problem -> show (pid problem) ++ " " ++ title problem
       nec = tuiRenderProblems ts
-   in [ vBox $
+   in [ viewport Viewport1 Vertical . vBox $
           concat
             [ map (drawStr False . renderProblem) $ reverse $ nonEmptyCursorPrev nec,
-              [drawStr True $ renderProblem $ nonEmptyCursorCurrent nec],
+              [visible $ drawStr True $ renderProblem $ nonEmptyCursorCurrent nec],
               map (drawStr False . renderProblem) $ nonEmptyCursorNext nec
             ]
       ]
@@ -69,7 +84,7 @@ drawTui ts =
 drawStr :: Bool -> String -> Widget n
 drawStr b = (if b then withAttr "current" else id) . str
 
-handleTuiEvent :: TuiState -> BrickEvent n e -> EventM n (Next TuiState)
+handleTuiEvent :: TuiState -> BrickEvent n e -> NewState
 handleTuiEvent s e =
   case e of
     VtyEvent vtye ->
@@ -81,29 +96,16 @@ handleTuiEvent s e =
         EvKey (KChar 'k') [] -> moveUp
         _ -> continue s
       where
-        moveDown = do
-          let nec = tuiRenderProblems s
-          case nonEmptyCursorSelectNext nec of
-            Nothing -> continue s
-            Just nec' -> continue $ s {tuiRenderProblems = nec'}
-        moveUp = do
-          let nec = tuiRenderProblems s
-          case nonEmptyCursorSelectPrev nec of
-            Nothing -> continue s
-            Just nec' -> continue $ s {tuiRenderProblems = nec'}
+        moveDown = select nonEmptyCursorSelectNext s
+        moveUp = select nonEmptyCursorSelectPrev s
+    -- moveDown = do
+    --   let nec = tuiRenderProblems s
+    --   case nonEmptyCursorSelectNext nec of
+    --     Nothing -> continue s
+    --     Just nec' -> continue $ s {tuiRenderProblems = nec'}
+    -- moveUp = do
+    --   let nec = tuiRenderProblems s
+    --   case nonEmptyCursorSelectPrev nec of
+    --     Nothing -> continue s
+    --     Just nec' -> continue $ s {tuiRenderProblems = nec'}
     _ -> continue s
-
--- problemsList :: Widget ()
--- problemsList = do
---   obj <- getResponseBody getUserInfo
---   obj
---   str "Center"
-
--- userInfo :: Widget String
--- userInfo = do
---   obj <- getResponseBody getUserInfo
---   case obj of
---     Bool False -> return "Error occured"
---     _ -> do
---       let username = (maybeToIO $ obj ^? key "user" . key "username") :: IO Value
---       return $ show $ liftIO username
