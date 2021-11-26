@@ -1,6 +1,6 @@
 module Main where
 
-import Screen (tui)
+import Frontend.App (tui)
 
 main :: IO ()
 main = tui

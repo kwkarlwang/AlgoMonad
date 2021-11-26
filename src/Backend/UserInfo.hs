@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Request.UserInfo where
+module Backend.UserInfo where
 
+import Backend.Utils
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.List (intercalate)
 import Network.HTTP.Req
-import Request.Utils
 
 type UserInfo = [(String, String)]
 

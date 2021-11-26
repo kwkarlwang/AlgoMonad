@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Request.Utils where
+module Backend.Utils where
 
 import Control.Lens hiding ((.=))
 import Data.Aeson

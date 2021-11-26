@@ -1,26 +1,29 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Request.Problems where
+module Backend.Problem where
 
+import Backend.Utils
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.List (sortOn)
 import Data.Vector (toList)
 import Network.HTTP.Req
-import Request.Utils
+
+data Status = Cleared | NotCleared | NotAttempted deriving (Eq, Show)
+
+data Difficulty = Easy | Medium | Hard deriving (Eq, Show)
 
 data Problem = Problem
   { pid :: Integer,
     title :: String,
-    difficulty :: Integer,
+    difficulty :: Difficulty,
     paidOnly :: Bool,
     totalAccept :: Integer,
-    totalSubmit :: Integer
+    totalSubmit :: Integer,
+    status :: Status
   }
   deriving (Eq, Show)
-
-type Problems = [Problem]
 
 requestProblems :: (FromJSON a) => Req (JsonResponse a)
 requestProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse headers
@@ -36,12 +39,23 @@ getProblem value = problem
     paidOnly = value ^? key "paid_only"
     totalAccept = value ^? key "stat" . key "total_acs"
     totalSubmit = value ^? key "stat" . key "total_submitted"
-    problem = case (pid, title, difficulty, paidOnly, totalAccept, totalSubmit) of
-      (Just (Integer pid), Just (String title), Just (Integer difficulty), Just (Bool paidOnly), Just (Integer totalAccept), Just (Integer totalSubmit)) ->
-        Problem pid (init . tail $ show title) difficulty paidOnly totalAccept totalSubmit
+    status = value ^? key "status"
+    problem = case (pid, title, difficulty, paidOnly, totalAccept, totalSubmit, status) of
+      (Just (Integer pid), Just (String title), Just (Integer difficulty), Just (Bool paidOnly), Just (Integer totalAccept), Just (Integer totalSubmit), status) ->
+        Problem pid (init . tail $ show title) diff paidOnly totalAccept totalSubmit stat
+        where
+          diff = case difficulty of
+            1 -> Easy
+            2 -> Medium
+            3 -> Hard
+            _ -> error "unexpected case"
+          stat = case status of
+            Just (String "notac") -> NotCleared
+            Just (String "ac") -> Cleared
+            _ -> NotAttempted
       _ -> error "failed to key"
 
-getProblems :: IO Problems
+getProblems :: IO [Problem]
 getProblems = do
   r <- runReq defaultHttpConfig requestProblems
   let reqData = responseBody r :: Value
@@ -51,5 +65,5 @@ getProblems = do
       let problems = reqData ^? key "stat_status_pairs"
        in case problems of
             -- Just (Array array) -> sortOn pid $ map getProblem (toList array)
-            Just (Array array) -> reverse $ map getProblem (toList array)
+            Just (Array array) -> reverse $ map getProblem $ take 100 (toList array)
             _ -> []
