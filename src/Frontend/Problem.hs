@@ -15,14 +15,14 @@ select selectF s = case selectF . tuiRenderProblems $ s of
   Nothing -> continue s
   Just problems -> continue $ s {tuiRenderProblems = problems}
 
-showProblem :: NonEmptyCursor Problem -> Widget ResourceName
-showProblem problems = viewport Viewport1 Vertical . hBox $ map (\f -> padLeftRight 1 $ f problems) components
+renderProblem :: NonEmptyCursor Problem -> Widget ResourceName
+renderProblem problems = viewport Viewport1 Vertical . hBox $ map (\f -> padLeftRight 1 $ f problems) components
   where
-    components = [showStatus, showTitle, showDifficulty, showPercent]
+    components = [renderStatus, renderTitle, renderDifficulty, renderPercent]
 
-showStatus :: NonEmptyCursor Problem -> Widget ResourceName
-showStatus =
-  showColumn
+renderStatus :: NonEmptyCursor Problem -> Widget ResourceName
+renderStatus =
+  renderColumn
     " "
     ( \problem -> case status problem of
         Cleared -> "✔"
@@ -30,29 +30,29 @@ showStatus =
         NotAttempted -> " "
     )
 
--- showId :: NonEmptyCursor Problem -> Widget ResourceName
--- showId = showColumn "ID" $ show . pid
+-- renderId :: NonEmptyCursor Problem -> Widget ResourceName
+-- renderId = renderColumn "ID" $ show . pid
 
-showTitle :: NonEmptyCursor Problem -> Widget ResourceName
-showTitle = showColumn "Title" (\problem -> show (pid problem) ++ " " ++ title problem)
+renderTitle :: NonEmptyCursor Problem -> Widget ResourceName
+renderTitle = renderColumn "Title" (\problem -> show (pid problem) ++ " " ++ title problem)
 
-showDifficulty :: NonEmptyCursor Problem -> Widget ResourceName
-showDifficulty = showColumn "Difficulty" $ show . difficulty
+renderDifficulty :: NonEmptyCursor Problem -> Widget ResourceName
+renderDifficulty = renderColumn "Difficulty" $ show . difficulty
 
--- showCount :: NonEmptyCursor Problem -> Widget ResourceName
--- showCount = showColumn "Accept/Submit" (\problem -> show (totalAccept problem) ++ "/" ++ show (totalSubmit problem))
+-- renderCount :: NonEmptyCursor Problem -> Widget ResourceName
+-- renderCount = renderColumn "Accept/Submit" (\problem -> show (totalAccept problem) ++ "/" ++ show (totalSubmit problem))
 
-showPercent :: NonEmptyCursor Problem -> Widget ResourceName
-showPercent =
-  showColumn
+renderPercent :: NonEmptyCursor Problem -> Widget ResourceName
+renderPercent =
+  renderColumn
     "Percent"
     ( \problem ->
         let decimal = totalAccept problem `floatDiv` totalSubmit problem
          in show $ floatRound (100 * decimal) 2
     )
 
-showColumn :: String -> (Problem -> String) -> NonEmptyCursor Problem -> Widget ResourceName
-showColumn headerTitle renderFunc problems =
+renderColumn :: String -> (Problem -> String) -> NonEmptyCursor Problem -> Widget ResourceName
+renderColumn headerTitle renderFunc problems =
   vBox $
     concat
       [ [str headerTitle],

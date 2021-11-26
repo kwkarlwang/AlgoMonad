@@ -30,6 +30,7 @@ library
       Backend.Utils
       Frontend.App
       Frontend.Problem
+      Frontend.ProblemList
       Frontend.State
       Frontend.Utils
   other-modules:

@@ -7,7 +7,7 @@ import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.List (sortOn)
-import Data.Vector (toList)
+import Data.Vector as V hiding (init, tail)
 import Network.HTTP.Req
 
 data Status = Cleared | NotCleared | NotAttempted deriving (Eq, Show)
@@ -55,15 +55,15 @@ getProblem value = problem
             _ -> NotAttempted
       _ -> error "failed to key"
 
-getProblems :: IO [Problem]
+getProblems :: IO (V.Vector Problem)
 getProblems = do
   r <- runReq defaultHttpConfig requestProblems
   let reqData = responseBody r :: Value
   return $ case reqData of
-    Bool False -> []
+    Bool False -> V.empty
     _ ->
       let problems = reqData ^? key "stat_status_pairs"
        in case problems of
             -- Just (Array array) -> sortOn pid $ map getProblem (toList array)
-            Just (Array array) -> reverse $ map getProblem $ take 100 (toList array)
-            _ -> []
+            Just (Array array) -> V.reverse $ V.map getProblem array
+            _ -> V.empty
