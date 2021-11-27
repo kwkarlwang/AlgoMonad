@@ -10,7 +10,12 @@ import Data.List (sortOn)
 import Data.Vector as V hiding (init, tail)
 import Network.HTTP.Req
 
-data Status = Cleared | NotCleared | NotAttempted deriving (Eq, Show)
+data Status = Cleared | NotCleared | NotAttempted deriving (Eq)
+
+instance Show Status where
+  show Cleared = " ✔"
+  show NotCleared = " ✘"
+  show NotAttempted = "  "
 
 data Difficulty = Easy | Medium | Hard deriving (Eq, Show)
 

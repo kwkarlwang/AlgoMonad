@@ -1,62 +1,68 @@
 module Frontend.Problem where
 
-import Backend.Problem (Problem (Problem, difficulty, pid, status, title, totalAccept, totalSubmit), Status (Cleared, NotAttempted, NotCleared))
-import Brick (ViewportType (Vertical), Widget, continue, hBox, padLeftRight, str, vBox, viewport, visible)
+import Backend.Problem (Problem (Problem, difficulty, paidOnly, pid, status, title, totalAccept, totalSubmit), Status (Cleared, NotAttempted, NotCleared))
+import Brick (Padding (Pad), TextWidth (textWidth), ViewportType (Vertical), Widget, continue, hBox, padLeftRight, padRight, str, vBox, viewport, visible)
 import Brick.Widgets.Center (hCenter)
-import Cursor.Simple.List.NonEmpty (NonEmptyCursor, nonEmptyCursorCurrent, nonEmptyCursorNext, nonEmptyCursorPrev, nonEmptyCursorSelectNext)
+import Brick.Widgets.List as BL hiding (reverse)
 import Data.List (intercalate)
-import Frontend.State (NewState, ResourceName (Viewport1), TuiState (TuiState, tuiRenderProblems))
+import Data.Vector as V hiding ((++))
+import Frontend.State (NewState, ResourceName (ProblemView), TuiState (TuiState, tuiStateProblems))
 import Frontend.Utils (drawStr, floatDiv, floatRound)
 
-type SelectF = NonEmptyCursor Problem -> Maybe (NonEmptyCursor Problem)
-
-select :: SelectF -> TuiState -> NewState
-select selectF s = case selectF . tuiRenderProblems $ s of
-  Nothing -> continue s
-  Just problems -> continue $ s {tuiRenderProblems = problems}
-
-renderProblem :: NonEmptyCursor Problem -> Widget ResourceName
-renderProblem problems = viewport Viewport1 Vertical . hBox $ map (\f -> padLeftRight 1 $ f problems) components
+renderProblem :: BL.List ResourceName Problem -> Widget ResourceName
+renderProblem problemList = BL.renderList renderFunc True problemList
   where
-    components = [renderStatus, renderTitle, renderDifficulty, renderPercent]
+    renderFunc bool problem =
+      hBox $
+        Prelude.map
+          (\f -> f bool problem)
+          [ renderStatus,
+            renderTitle maxTitleWidth,
+            renderDifficulty maxDifficultyWidth,
+            renderPercent maxPercentWidth
+          ]
+    problemVector = BL.listElements problemList
+    maxTitleWidth = V.maximum $ V.map (textWidth . showTitle) problemVector
+    maxDifficultyWidth = V.maximum $ V.map (textWidth . showDifficulty) problemVector
+    maxPercentWidth = V.maximum $ V.map (textWidth . showPercent) problemVector
 
-renderStatus :: NonEmptyCursor Problem -> Widget ResourceName
-renderStatus =
-  renderColumn
-    " "
-    ( \problem -> case status problem of
-        Cleared -> "✔"
-        NotCleared -> "✘"
-        NotAttempted -> " "
-    )
+renderStatus :: Bool -> Problem -> Widget ResourceName
+renderStatus bool problem = padLeftRight 1 $ drawStr bool . showStatus $ problem
 
--- renderId :: NonEmptyCursor Problem -> Widget ResourceName
--- renderId = renderColumn "ID" $ show . pid
+renderTitle :: Int -> Bool -> Problem -> Widget ResourceName
+renderTitle maxPad bool problem = padRight (Pad (maxPad - titleWidth)) widget
+  where
+    titleString = showTitle problem
+    widget = drawStr bool titleString
+    titleWidth = textWidth titleString
 
-renderTitle :: NonEmptyCursor Problem -> Widget ResourceName
-renderTitle = renderColumn "Title" (\problem -> show (pid problem) ++ " " ++ title problem)
+renderDifficulty :: Int -> Bool -> Problem -> Widget ResourceName
+renderDifficulty maxPad bool problem = padRight (Pad (maxPad - difficultyWidth + 2)) widget
+  where
+    difficultyString = showDifficulty problem
+    widget = drawStr bool difficultyString
+    difficultyWidth = textWidth difficultyString
 
-renderDifficulty :: NonEmptyCursor Problem -> Widget ResourceName
-renderDifficulty = renderColumn "Difficulty" $ show . difficulty
+renderPercent :: Int -> Bool -> Problem -> Widget ResourceName
+renderPercent maxPad bool problem = padRight (Pad (maxPad - percentWidth)) widget
+  where
+    percentString = showPercent problem
+    widget = drawStr bool percentString
+    percentWidth = textWidth percentString
 
--- renderCount :: NonEmptyCursor Problem -> Widget ResourceName
--- renderCount = renderColumn "Accept/Submit" (\problem -> show (totalAccept problem) ++ "/" ++ show (totalSubmit problem))
+showStatus :: Problem -> String
+showStatus = show . status
 
-renderPercent :: NonEmptyCursor Problem -> Widget ResourceName
-renderPercent =
-  renderColumn
-    "Percent"
-    ( \problem ->
-        let decimal = totalAccept problem `floatDiv` totalSubmit problem
-         in show $ floatRound (100 * decimal) 2
-    )
+showTitle :: Problem -> String
+showTitle problem = show (pid problem) ++ " " ++ title problem
 
-renderColumn :: String -> (Problem -> String) -> NonEmptyCursor Problem -> Widget ResourceName
-renderColumn headerTitle renderFunc problems =
-  vBox $
-    concat
-      [ [str headerTitle],
-        map (drawStr False . renderFunc) $ reverse $ nonEmptyCursorPrev problems,
-        [visible $ drawStr True $ renderFunc $ nonEmptyCursorCurrent problems],
-        map (drawStr False . renderFunc) $ nonEmptyCursorNext problems
-      ]
+showDifficulty :: Problem -> String
+showDifficulty = show . difficulty
+
+showPercent :: Problem -> String
+showPercent problem = (show . getPercent) problem ++ "%"
+
+getPercent :: Problem -> Float
+getPercent problem = floatRound (100 * decimal) 2
+  where
+    decimal = totalAccept problem `floatDiv` totalSubmit problem
