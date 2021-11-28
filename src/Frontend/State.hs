@@ -17,4 +17,5 @@ type NewState = EventM ResourceName (Next TuiState)
 
 data ResourceName
   = ProblemView
+  | DetailView
   deriving (Eq, Ord, Show)

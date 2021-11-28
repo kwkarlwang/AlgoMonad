@@ -4,25 +4,25 @@
 module Backend.ProblemDetail where
 
 import Backend.Utils
+import qualified Brick.Widgets.List as BL
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.Aeson.Text (encodeToLazyText)
 import Data.List (intercalate)
-import qualified Data.Text as T (Text, pack, unpack)
-import qualified Data.Text.Lazy as TL
-import qualified Data.Text.Lazy.Encoding as TLE
+import qualified Data.Text as T (Text, unpack)
+import qualified Data.Text.Lazy as TL (fromStrict)
+import qualified Data.Text.Lazy.Encoding as TLE (encodeUtf8)
 import qualified Data.Vector as V
-import Debug.Trace (traceM)
-import GHC.Exts
+import Frontend.State (ResourceName (DetailView))
 import Network.HTTP.Req
 
 data ProblemDetail = ProblemDetail
   { slug :: String,
     content :: String,
-    codeDefinition :: [(String, String)]
+    codeDefinitionList :: BL.List ResourceName (String, String)
   }
-  deriving (Eq, Show)
+  deriving (Show)
 
 requestProblemDetail :: (FromJSON a) => String -> Req (JsonResponse a)
 requestProblemDetail slug =
@@ -49,12 +49,12 @@ valueToText :: Value -> T.Text
 valueToText (String x) = x
 valueToText _ = error "Not Text"
 
-makeProblemDetail :: [Value] -> Maybe [(String, String)]
+makeProblemDetail :: Array -> Maybe (V.Vector (String, String))
 makeProblemDetail codeDefinition =
   do
-    codeKey <- mapM (\value -> T.unpack . valueToText <$> value ^? key "value") codeDefinition
-    codeValue <- mapM (\value -> T.unpack . valueToText <$> value ^? key "defaultCode") codeDefinition
-    return $ zip codeKey codeValue
+    codeKey <- V.mapM (\value -> T.unpack . valueToText <$> value ^? key "value") codeDefinition
+    codeValue <- V.mapM (\value -> T.unpack . valueToText <$> value ^? key "defaultCode") codeDefinition
+    return $ V.zip codeKey codeValue
 
 getProblemDetail :: String -> IO ProblemDetail
 getProblemDetail slug = do
@@ -66,8 +66,9 @@ getProblemDetail slug = do
                   content <- T.unpack . valueToText <$> questionData ^? key "content"
                   codeDefinitionStr <- valueToText <$> questionData ^? key "codeDefinition"
                   let codeDefinitionText = TLE.encodeUtf8 $ TL.fromStrict codeDefinitionStr
-                  codeDefinitionValue <- (decode codeDefinitionText :: Maybe [Value])
+                  codeDefinitionValue <- decode codeDefinitionText :: Maybe Array
                   codeDefinition <- makeProblemDetail codeDefinitionValue
+                  let codeDefinitionList = BL.list DetailView codeDefinition 1
                   return $ ProblemDetail {..}
               ) of
       Just x -> return x

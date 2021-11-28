@@ -6,7 +6,6 @@ import Backend.Utils
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
-import Data.List (sortOn)
 import Data.Vector as V hiding (init, tail)
 import Network.HTTP.Req
 
