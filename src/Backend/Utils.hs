@@ -27,5 +27,5 @@ getResponseBody request = do
   maybeToIO $ res ^? key "data"
 
 maybeToIO :: Maybe Value -> IO Value
-maybeToIO Nothing = return $ Bool False
+maybeToIO Nothing = return Null
 maybeToIO (Just x) = return x

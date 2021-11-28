@@ -9,6 +9,7 @@ import Brick.Widgets.List as BL
 import Data.Vector as V
 import Frontend.Problem as P
 import Frontend.State (NewState, ResourceName (ProblemView), TuiState (TuiState, tuiStateProblemList, tuiStateProblems, tuiStateUserInfo))
+import Frontend.UserInfo as UI
 import Frontend.Utils (makeCursor)
 import Graphics.Vty.Attributes
 import Graphics.Vty.Input.Events
@@ -42,7 +43,7 @@ buildInitialState =
         }
 
 drawTui :: TuiState -> [Widget ResourceName]
-drawTui ts = Prelude.map (\f -> f ts) [P.renderProblem . tuiStateProblemList]
+drawTui ts = [vBox $ Prelude.map (\f -> f ts) [UI.renderUserInfo . tuiStateUserInfo, P.renderProblem . tuiStateProblemList]]
 
 handleTuiEvent :: TuiState -> BrickEvent n e -> NewState
 handleTuiEvent s e =

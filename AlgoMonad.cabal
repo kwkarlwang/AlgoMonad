@@ -26,11 +26,13 @@ source-repository head
 library
   exposed-modules:
       Backend.Problem
+      Backend.ProblemDetail
       Backend.UserInfo
       Backend.Utils
       Frontend.App
       Frontend.Problem
       Frontend.State
+      Frontend.UserInfo
       Frontend.Utils
   other-modules:
       Paths_AlgoMonad
@@ -40,7 +42,7 @@ library
       aeson ==2.0.1.0
     , base >=4.7 && <5
     , brick ==0.64.2
-    , bytestring ==0.10.12.0
+    , bytestring ==0.11.1.0
     , cursor ==0.3.0.0
     , lens ==4.19.2
     , lens-aeson ==1.1.2
@@ -62,7 +64,7 @@ executable am
     , aeson ==2.0.1.0
     , base >=4.7 && <5
     , brick ==0.64.2
-    , bytestring ==0.10.12.0
+    , bytestring ==0.11.1.0
     , cursor ==0.3.0.0
     , lens ==4.19.2
     , lens-aeson ==1.1.2
@@ -85,7 +87,7 @@ test-suite AlgoMonad-test
     , aeson ==2.0.1.0
     , base >=4.7 && <5
     , brick ==0.64.2
-    , bytestring ==0.10.12.0
+    , bytestring ==0.11.1.0
     , cursor ==0.3.0.0
     , lens ==4.19.2
     , lens-aeson ==1.1.2

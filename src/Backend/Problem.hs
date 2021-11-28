@@ -65,7 +65,7 @@ getProblems = do
   r <- runReq defaultHttpConfig requestProblems
   let reqData = responseBody r :: Value
   return $ case reqData of
-    Bool False -> V.empty
+    Null -> V.empty
     _ ->
       let problems = reqData ^? key "stat_status_pairs"
        in case problems of

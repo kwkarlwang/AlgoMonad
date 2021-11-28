@@ -15,7 +15,19 @@ requestUserInfo :: (FromJSON a) => Req (JsonResponse a)
 requestUserInfo =
   req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse headers
   where
-    payload = object ["query" .= intercalate "\n" ["{", "  user {", "    username", "    isCurrentUserPremium", "  }", "}"]]
+    payload =
+      object
+        [ "query"
+            .= intercalate
+              "\n"
+              [ "{",
+                "  user {",
+                "    username",
+                "    isCurrentUserPremium",
+                "  }",
+                "}"
+              ]
+        ]
     -- headersMap = [("Referer", "https://leetcode.com"), ("Origin", "https://leetcode.com")]
     -- headers = makeHeaders headersMap <> getCredentials
     headers = getCredentials
@@ -24,15 +36,15 @@ getUserInfo :: IO UserInfo
 getUserInfo = do
   reqData <- getResponseBody requestUserInfo
   return $ case reqData of
-    Bool False -> [("Error occured", "")]
+    Null -> error "Need to re login in the browser"
     _ ->
       let username = reqData ^? key "user" . key "username"
           isCurrentUserPremium = reqData ^? key "user" . key "isCurrentUserPremium"
        in map
             ( \(key, maybe) ->
                 case maybe of
-                  Just (String x) -> (key ++ ": ", init . tail . show $ x)
-                  Just (Bool x) -> (key ++ ": ", show x)
-                  _ -> ("Error occured", "")
+                  Just (String x) -> (key, init . tail . show $ x)
+                  Just (Bool x) -> (key, show x)
+                  _ -> error "Need to re login in the browser"
             )
             [("username", username), ("premium", isCurrentUserPremium)]
