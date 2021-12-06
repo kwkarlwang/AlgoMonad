@@ -30,7 +30,9 @@ library
       Backend.UserInfo
       Backend.Utils
       Frontend.App
+      Frontend.KeyBinding
       Frontend.Problem
+      Frontend.ProblemDetail
       Frontend.State
       Frontend.UserInfo
       Frontend.Utils

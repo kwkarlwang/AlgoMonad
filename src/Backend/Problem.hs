@@ -25,7 +25,8 @@ data Problem = Problem
     paidOnly :: Bool,
     totalAccept :: Integer,
     totalSubmit :: Integer,
-    status :: Status
+    status :: Status,
+    slug :: String
   }
   deriving (Eq, Show)
 
@@ -44,9 +45,10 @@ getProblem value = problem
     totalAccept = value ^? key "stat" . key "total_acs"
     totalSubmit = value ^? key "stat" . key "total_submitted"
     status = value ^? key "status"
-    problem = case (pid, title, difficulty, paidOnly, totalAccept, totalSubmit, status) of
-      (Just (Integer pid), Just (String title), Just (Integer difficulty), Just (Bool paidOnly), Just (Integer totalAccept), Just (Integer totalSubmit), status) ->
-        Problem pid (init . tail $ show title) diff paidOnly totalAccept totalSubmit stat
+    slug = value ^? key "stat" . key "question__title_slug"
+    problem = case (pid, title, difficulty, paidOnly, totalAccept, totalSubmit, status, slug) of
+      (Just (Integer pid), Just (String title), Just (Integer difficulty), Just (Bool paidOnly), Just (Integer totalAccept), Just (Integer totalSubmit), status, Just (String slug)) ->
+        Problem pid (init . tail $ show title) diff paidOnly totalAccept totalSubmit stat (init . tail $ show slug)
         where
           diff = case difficulty of
             1 -> Easy

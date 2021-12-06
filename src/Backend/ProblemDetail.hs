@@ -14,13 +14,13 @@ import qualified Data.Text as T (Text, unpack)
 import qualified Data.Text.Lazy as TL (fromStrict)
 import qualified Data.Text.Lazy.Encoding as TLE (encodeUtf8)
 import qualified Data.Vector as V
-import Frontend.State (ResourceName (DetailView))
+import Debug.Trace (traceM)
 import Network.HTTP.Req
 
 data ProblemDetail = ProblemDetail
   { slug :: String,
     content :: String,
-    codeDefinitionList :: BL.List ResourceName (String, String)
+    codeDefinitionVector :: V.Vector (String, String)
   }
   deriving (Show)
 
@@ -67,8 +67,7 @@ getProblemDetail slug = do
                   codeDefinitionStr <- valueToText <$> questionData ^? key "codeDefinition"
                   let codeDefinitionText = TLE.encodeUtf8 $ TL.fromStrict codeDefinitionStr
                   codeDefinitionValue <- decode codeDefinitionText :: Maybe Array
-                  codeDefinition <- makeProblemDetail codeDefinitionValue
-                  let codeDefinitionList = BL.list DetailView codeDefinition 1
+                  codeDefinitionVector <- makeProblemDetail codeDefinitionValue
                   return $ ProblemDetail {..}
               ) of
       Just x -> return x

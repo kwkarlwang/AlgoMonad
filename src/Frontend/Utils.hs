@@ -9,14 +9,8 @@ import Data.Function (on)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE
 
-makeCursor :: [a] -> NonEmptyCursor a
-makeCursor xs = do
-  case NE.nonEmpty xs of
-    Nothing -> error "Empty list"
-    Just ne -> makeNonEmptyCursor ne
-
 drawStr :: Bool -> String -> Widget n
-drawStr b = (if b then withAttr "current" else id) . str
+drawStr b = (if b then withAttr "selected" else id) . str
 
 floatDiv :: Integer -> Integer -> Float
 floatDiv = (/) `on` fromIntegral
