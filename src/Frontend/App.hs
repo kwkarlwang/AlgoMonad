@@ -23,6 +23,7 @@ import Brick
     vBox,
     withAttr,
   )
+import Brick.Util (on)
 import Brick.Widgets.Border (border, vBorder)
 import Brick.Widgets.List (handleListEventVi)
 import qualified Brick.Widgets.List as BL
@@ -66,8 +67,14 @@ tuiApp =
         const $
           attrMap
             mempty
-            [ ("current", withStyle (withForeColor (bg brightMagenta) black) bold),
-              ("selected", fg brightMagenta)
+            [ ("white", fg brightWhite),
+              ("selected" <> "black", withStyle (black `on` magenta) bold),
+              ("red", fg red),
+              ("selected" <> "red", withStyle (red `on` magenta) bold),
+              ("yellow", fg yellow),
+              ("selected" <> "yellow", withStyle (yellow `on` magenta) bold),
+              ("green", fg green),
+              ("selected" <> "green", withStyle (green `on` magenta) bold)
             ]
     }
 

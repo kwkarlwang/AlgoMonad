@@ -1,18 +1,35 @@
 module Frontend.Problem where
 
-import Backend.Problem (Problem (Problem, difficulty, paidOnly, pid, status, title, totalAccept, totalSubmit), Status (Cleared, NotAttempted, NotCleared))
-import Brick (Padding (Pad), TextWidth (textWidth), ViewportType (Vertical), Widget, continue, hBox, padLeftRight, padRight, str, vBox, viewport, visible)
+import Backend.Problem
+  ( Difficulty (Easy, Hard, Medium),
+    Problem (Problem, difficulty, paidOnly, pid, status, title, totalAccept, totalSubmit),
+    Status (Cleared, NotAttempted, NotCleared),
+  )
+import Brick
+  ( Padding (Pad),
+    TextWidth (textWidth),
+    ViewportType (Vertical),
+    Widget,
+    continue,
+    hBox,
+    padLeftRight,
+    padRight,
+    str,
+    vBox,
+    viewport,
+    visible,
+  )
 import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.List as BL hiding (reverse)
 import Data.List (intercalate)
 import Data.Vector as V hiding ((++))
 import Frontend.State (NewState, ResourceName (ProblemView), TuiState (TuiState, tuiStateProblems))
-import Frontend.Utils (drawStr, floatDiv, floatRound)
+import Frontend.Utils (drawGreen, drawRed, drawStr, drawYellow, floatDiv, floatRound)
 
 renderProblem :: Bool -> BL.List ResourceName Problem -> Widget ResourceName
 renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemList
   where
-    renderFunc bool problem = hBox $ Prelude.map (\f -> f bool problem) components
+    renderFunc bool problem = hBox $ Prelude.map (\f -> f bool problem) components ++ [drawStr False " "]
     -- components =
     --   if hasFocus
     --     then
@@ -38,7 +55,18 @@ renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemLi
     maxPercentWidth = V.maximum $ V.map (textWidth . showPercent) problemVector
 
 renderStatus :: Bool -> Problem -> Widget ResourceName
-renderStatus bool problem = padLeftRight 1 $ drawStr bool . showStatus $ problem
+renderStatus bool problem = padLeftRight 1 widget
+  where
+    currentStatus = status problem
+    widget =
+      ( case currentStatus of
+          Cleared -> drawGreen
+          NotCleared -> drawRed
+          NotAttempted -> drawStr
+      )
+        bool
+        $ showStatus
+          problem
 
 renderTitle :: Int -> Bool -> Problem -> Widget ResourceName
 renderTitle maxPad bool problem = padRight (Pad (maxPad - titleWidth)) widget
@@ -51,7 +79,15 @@ renderDifficulty :: Int -> Bool -> Problem -> Widget ResourceName
 renderDifficulty maxPad bool problem = padRight (Pad (maxPad - difficultyWidth + 2)) widget
   where
     difficultyString = showDifficulty problem
-    widget = drawStr bool difficultyString
+    widget =
+      ( case difficulty problem of
+          Easy -> drawGreen
+          Medium -> drawYellow
+          Hard -> drawRed
+      )
+        bool
+        difficultyString
+
     difficultyWidth = textWidth difficultyString
 
 renderPercent :: Int -> Bool -> Problem -> Widget ResourceName
