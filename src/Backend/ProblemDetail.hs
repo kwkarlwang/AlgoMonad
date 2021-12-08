@@ -14,8 +14,8 @@ import qualified Data.Text as T (Text, unpack)
 import qualified Data.Text.Lazy as TL (fromStrict)
 import qualified Data.Text.Lazy.Encoding as TLE (encodeUtf8)
 import qualified Data.Vector as V
-import Debug.Trace (traceM)
 import Network.HTTP.Req
+import qualified System.Directory as DIR
 
 data ProblemDetail = ProblemDetail
   { slug :: String,
@@ -23,6 +23,27 @@ data ProblemDetail = ProblemDetail
     codeDefinitionVector :: V.Vector (String, String)
   }
   deriving (Show)
+
+langToExtension =
+  [ ("c", ".c"),
+    ("cpp", ".cpp"),
+    ("csharp", ".cs"),
+    ("golang", ".go"),
+    ("java", ".java"),
+    ("javascript", ".js"),
+    ("typescript", ".ts"),
+    ("kotlin", ".kt"),
+    ("php", ".php"),
+    ("python", ".py"),
+    ("python3", ".py"),
+    ("ruby", ".rb"),
+    ("rust", ".rs"),
+    ("scala", ".scala"),
+    ("swift", ".swift"),
+    ("racket", ".rkt"),
+    ("erlang", ".erl"),
+    ("elixir", ".exs")
+  ]
 
 requestProblemDetail :: (FromJSON a) => String -> Req (JsonResponse a)
 requestProblemDetail slug =
@@ -72,3 +93,14 @@ getProblemDetail slug = do
               ) of
       Just x -> return x
       Nothing -> error "error parsing"
+
+writeProblemToFile :: String -> String -> (String, String) -> IO ()
+writeProblemToFile slug content codeDefinitionPair = do
+  let folderPath = "./" ++ slug ++ ".algomonad"
+  let contentText = content
+  let (codeLang, codeText) = codeDefinitionPair
+  let codeFileExtension = snd $ head $ filter (\tup -> fst tup == codeLang) langToExtension
+  DIR.createDirectoryIfMissing True folderPath
+  writeFile (folderPath ++ "/" ++ slug ++ ".html") contentText
+  writeFile (folderPath ++ "/" ++ slug ++ codeFileExtension) codeText
+  return ()

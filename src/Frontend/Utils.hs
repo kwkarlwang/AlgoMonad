@@ -4,7 +4,6 @@ module Frontend.Utils where
 
 import Brick (Widget (Widget), str, withAttr)
 import Brick.Widgets.List (list)
-import Cursor.Simple.List.NonEmpty (NonEmptyCursor, makeNonEmptyCursor)
 import Data.Function (on)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NE

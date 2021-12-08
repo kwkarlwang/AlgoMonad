@@ -70,6 +70,5 @@ getProblems = do
     _ ->
       let problems = reqData ^? key "stat_status_pairs"
        in case problems of
-            -- Just (Array array) -> sortOn pid $ map getProblem (toList array)
             Just (Array array) -> V.reverse $ V.map getProblem array
             _ -> V.empty

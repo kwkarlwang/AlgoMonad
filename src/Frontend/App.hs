@@ -17,6 +17,7 @@ import Brick
     defaultMain,
     fg,
     hBox,
+    hLimit,
     halt,
     showFirstCursor,
     str,

@@ -76,6 +76,22 @@ handleOtherEvent s (EvKey (KChar 'l') []) = do
 handleOtherEvent s (EvKey (KChar 'h') []) = do
   newState <- handleFocusProblem s
   continue newState
+handleOtherEvent s (EvKey KEnter []) =
+  if tuiStateCurrentFocus s == DetailFocus
+    then do
+      let problemDetail = tuiStateProblemDetail s
+      case problemDetail of
+        Nothing -> continue s
+        Just problemDetail -> do
+          let currentCodePair = BL.listSelectedElement $ codeDefinitionList problemDetail
+          case currentCodePair of
+            Nothing -> continue s
+            Just (_, currentCodePair) -> do
+              liftIO $ PD.writeProblemToFile (slug problemDetail) (content problemDetail) currentCodePair
+              continue s
+
+      continue s
+    else continue s
 handleOtherEvent s _ = continue s
 
 handleTuiEvent :: TuiState -> BrickEvent n e -> NewState

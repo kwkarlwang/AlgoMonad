@@ -3,7 +3,21 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: Crypto-4.2.5.1@sha256:52275a055f4adf7c488260fb9fae60d03679632e64d3c8fc69d8b5951e8129cc,3688
+    pantry-tree:
+      size: 2200
+      sha256: bcfda2201140d9231b31b28050141ecda4e2b1e1a0c408de8228402b8a854f12
+  original:
+    hackage: Crypto-4.2.5.1@sha256:52275a055f4adf7c488260fb9fae60d03679632e64d3c8fc69d8b5951e8129cc,3688
+- completed:
+    hackage: keyring-0.1.0.5@sha256:8bdede8c42122c7b6e32d87c8ae558ba8aa8b0c637c395ff3506be0e4317bdcf,2562
+    pantry-tree:
+      size: 716
+      sha256: 24636e285e4a62a986e75d9e71a96411fea413e4a03816ca4c402eec3d946ca3
+  original:
+    hackage: keyring-0.1.0.5@sha256:8bdede8c42122c7b6e32d87c8ae558ba8aa8b0c637c395ff3506be0e4317bdcf,2562
 snapshots:
 - completed:
     size: 586069
