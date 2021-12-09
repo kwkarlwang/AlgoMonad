@@ -34,6 +34,7 @@ library
       Frontend.KeyBinding
       Frontend.Problem
       Frontend.ProblemDetail
+      Frontend.Search
       Frontend.State
       Frontend.UserInfo
       Frontend.Utils

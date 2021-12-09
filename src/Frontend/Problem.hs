@@ -30,18 +30,6 @@ renderProblem :: Bool -> BL.List ResourceName Problem -> Widget ResourceName
 renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemList
   where
     renderFunc bool problem = hBox $ Prelude.map (\f -> f bool problem) components ++ [drawStr False " "]
-    -- components =
-    --   if hasFocus
-    --     then
-    --       [ renderStatus,
-    --         renderTitle maxTitleWidth,
-    --         renderDifficulty maxDifficultyWidth,
-    --         renderPercent maxPercentWidth
-    --       ]
-    --     else
-    --       [ renderStatus,
-    --         renderTitle maxTitleWidth
-    --       ]
     components =
       [ renderStatus,
         renderTitle maxTitleWidth,
@@ -52,7 +40,7 @@ renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemLi
     problemVector = BL.listElements problemList
     maxTitleWidth = V.maximum $ V.map (textWidth . showTitle) problemVector
     maxDifficultyWidth = V.maximum $ V.map (textWidth . showDifficulty) problemVector
-    maxPercentWidth = V.maximum $ V.map (textWidth . showPercent) problemVector
+    maxPercentWidth = V.maximum (V.map (textWidth . showPercent) problemVector)
 
 renderStatus :: Bool -> Problem -> Widget ResourceName
 renderStatus bool problem = padLeftRight 1 widget
@@ -107,7 +95,7 @@ showDifficulty :: Problem -> String
 showDifficulty = show . difficulty
 
 showPercent :: Problem -> String
-showPercent problem = (show . getPercent) problem ++ "%"
+showPercent problem = (show . getPercent) problem ++ "% "
 
 getPercent :: Problem -> Float
 getPercent problem = floatRound (100 * decimal) 2

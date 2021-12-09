@@ -14,7 +14,7 @@ import System.Directory (getHomeDirectory)
 
 getCredentials :: IO (Option scheme)
 getCredentials = do
-  (csrfToken, leetcodeSession) <- getConfigFromFile False
+  (csrfToken, leetcodeSession) <- getConfigFromFile
   return $ header "Cookie" $ "csrftoken=" <> csrfToken <> ";LEETCODE_SESSION=" <> leetcodeSession <> ";"
 
 getResponseBody :: Req (JsonResponse Value) -> IO Value

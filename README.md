@@ -50,3 +50,9 @@ Here is a list of libraries needed for this program
 
 - [leetcode-cli](https://github.com/skygragon/leetcode-cli): Main source of inspiration. However, this is just a pure cli instead of a TUI. Implemented in javascript
 - [vscode-leetcode](https://github.com/LeetCode-OpenSource/vscode-leetcode): A GUI for LeetCode. However, only available on VSCode. Implemented in javascript.
+
+## Guide
+
+Login to leetcode.com from the chromium browser
+
+go to [chrome://settings/cookies/detail?site=leetcode.com](chrome://settings/cookies/detail?site=leetcode.com) to acquire leetcode session and csrftoken

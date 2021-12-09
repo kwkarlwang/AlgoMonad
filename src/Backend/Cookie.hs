@@ -68,33 +68,26 @@ writeCookieToFile pairs = do
   configPath <- getConfigPath
   Yaml.encodeFile configPath jsonObject
 
-getConfigFromFile :: Bool -> IO (B.ByteString, B.ByteString)
-getConfigFromFile hasRetry = do
+getConfigFromFile :: IO (B.ByteString, B.ByteString)
+getConfigFromFile = do
   configPath <- getConfigPath
   bool <- doesFileExist configPath
-  case (bool, hasRetry) of
-    (False, False) -> do
-      getChromeCookie
-      getConfigFromFile True
-    (False, True) -> error "Cannot acquire credientials"
-    (True, _) -> do
-      eitherDecode <- Yaml.decodeFile configPath :: IO (Maybe Value)
-      case (eitherDecode, hasRetry) of
-        (Nothing, False) -> do
-          getChromeCookie
-          getConfigFromFile True
-        (Nothing, True) -> do
-          error "Cannot acquire credientials"
-        (Just yamlValue, _) -> do
-          let csrfToken = yamlValue ^? key "csrftoken"
-          let leetcodeSession = yamlValue ^? key "LEETCODE_SESSION"
-          case (csrfToken, leetcodeSession, hasRetry) of
-            (Just (String csrfToken), Just (String leetcodeSession), _) -> do
-              return (BU.fromString $ T.unpack csrfToken, BU.fromString $ T.unpack leetcodeSession)
-            (_, _, False) -> do
-              getChromeCookie
-              getConfigFromFile True
-            (_, _, True) -> error "Cannot acquire credientials"
+  if bool
+    then
+      ( do
+          eitherDecode <- Yaml.decodeFile configPath :: IO (Maybe Value)
+          case eitherDecode of
+            Nothing -> do
+              error "Cannot acquire credientials"
+            Just yamlValue -> do
+              let csrfToken = yamlValue ^? key "csrftoken"
+              let leetcodeSession = yamlValue ^? key "LEETCODE_SESSION"
+              case (csrfToken, leetcodeSession) of
+                (Just (String csrfToken), Just (String leetcodeSession)) -> do
+                  return (BU.fromString $ T.unpack csrfToken, BU.fromString $ T.unpack leetcodeSession)
+                (_, _) -> error "Cannot acquire credientials"
+      )
+    else error "Please create config file"
 
 newtype Key a = Key B.ByteString
   deriving (Show, Eq)
