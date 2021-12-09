@@ -4,6 +4,7 @@ module Backend.Problem where
 
 import Backend.Utils
 import Control.Lens hiding ((.=))
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.Vector as V hiding (init, tail)
@@ -30,10 +31,9 @@ data Problem = Problem
   }
   deriving (Eq, Show)
 
-requestProblems :: (FromJSON a) => Req (JsonResponse a)
-requestProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse headers
-  where
-    headers = getCredentials
+requestProblems :: (FromJSON a) => IO (Req (JsonResponse a))
+requestProblems = do
+  req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse <$> getCredentials
 
 getProblem :: Value -> Problem
 getProblem value = problem
@@ -63,7 +63,8 @@ getProblem value = problem
 
 getProblems :: IO (V.Vector Problem)
 getProblems = do
-  r <- runReq defaultHttpConfig requestProblems
+  request <- requestProblems
+  r <- runReq defaultHttpConfig request
   let reqData = responseBody r :: Value
   return $ case reqData of
     Null -> V.empty

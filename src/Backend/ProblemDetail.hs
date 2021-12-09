@@ -45,9 +45,9 @@ langToExtension =
     ("elixir", ".exs")
   ]
 
-requestProblemDetail :: (FromJSON a) => String -> Req (JsonResponse a)
-requestProblemDetail slug =
-  req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse headers
+requestProblemDetail :: (FromJSON a) => String -> IO (Req (JsonResponse a))
+requestProblemDetail slug = do
+  req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse <$> getCredentials
   where
     payload =
       object
@@ -64,7 +64,6 @@ requestProblemDetail slug =
           "variables" .= object ["titleSlug" .= slug],
           "operationName" .= ("getQuestionDetail" :: String)
         ]
-    headers = getCredentials
 
 valueToText :: Value -> T.Text
 valueToText (String x) = x
@@ -79,7 +78,8 @@ makeProblemDetail codeDefinition =
 
 getProblemDetail :: String -> IO ProblemDetail
 getProblemDetail slug = do
-  reqData <- getResponseBody $ requestProblemDetail slug
+  request <- requestProblemDetail slug
+  reqData <- getResponseBody request
   if reqData == Null
     then error "Need to re login in the browser"
     else case ( do

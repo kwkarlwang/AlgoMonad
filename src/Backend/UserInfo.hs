@@ -11,9 +11,9 @@ import Network.HTTP.Req
 
 type UserInfo = [(String, String)]
 
-requestUserInfo :: (FromJSON a) => Req (JsonResponse a)
-requestUserInfo =
-  req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse headers
+requestUserInfo :: (FromJSON a) => IO (Req (JsonResponse a))
+requestUserInfo = do
+  req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse <$> getCredentials
   where
     payload =
       object
@@ -28,15 +28,14 @@ requestUserInfo =
                 "}"
               ]
         ]
-    -- headersMap = [("Referer", "https://leetcode.com"), ("Origin", "https://leetcode.com")]
-    -- headers = makeHeaders headersMap <> getCredentials
-    headers = getCredentials
 
 getUserInfo :: IO UserInfo
 getUserInfo = do
-  reqData <- getResponseBody requestUserInfo
+  request <- requestUserInfo
+  reqData <- getResponseBody request
   return $ case reqData of
-    Null -> error "Need to re login in the browser"
+    Null -> do
+      error "Please login in to leetcode in Chrome and try again"
     _ ->
       let username = reqData ^? key "user" . key "username"
           isCurrentUserPremium = reqData ^? key "user" . key "isCurrentUserPremium"

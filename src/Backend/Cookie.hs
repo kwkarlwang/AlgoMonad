@@ -1,26 +1,30 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PackageImports #-}
 
 module Backend.Cookie where
 
 import Control.Applicative
+import Control.Lens ((^?))
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Crypto.Cipher.AES (AES128)
 import Crypto.Cipher.Types (BlockCipher (..), Cipher (..), IV, makeIV)
 import Crypto.Error (CryptoFailable (..))
 import Crypto.KDF.PBKDF2 (Parameters (..), fastPBKDF2_SHA1)
+import Data.Aeson (Value (String), object, (.=))
+import Data.Aeson.Lens (key)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.UTF8 as BU
+import qualified Data.Text as T
+import qualified Data.Vector as V
+import Data.Yaml (decodeFile)
+import qualified Data.Yaml as Yaml
 import Database.SQLite.Simple
-import Database.SQLite.Simple.FromRow
-import Debug.Trace (traceM)
-import System.Directory (getHomeDirectory)
+import System.Directory (doesFileExist, getHomeDirectory)
 import qualified System.Keyring as Keyring (Password (Password), Service (Service), Username (Username), getPassword)
 
-data CookieField = CookieField String B.ByteString deriving (Show)
-
-instance FromRow CookieField where
-  fromRow = CookieField <$> field <*> field
+getConfigPath :: IO FilePath
+getConfigPath = do
+  homePath <- getHomeDirectory
+  return $ homePath ++ "/.algomonad.yaml"
 
 chromeMacPath :: IO FilePath
 chromeMacPath = do
@@ -36,8 +40,11 @@ getChromeCookie = do
   close conn
   let keys = ["LEETCODE_SESSION", "csrftoken"]
   let filterResult = filter (\tup -> fst tup `elem` keys) result
-  decrypted <- zip (map fst filterResult) <$> mapM (decryptChromeCookie . snd) filterResult
-  return ()
+  case length filterResult of
+    2 -> do
+      decrypted <- zip (map fst filterResult) <$> mapM (decryptChromeCookie . snd) filterResult
+      writeCookieToFile decrypted
+    _ -> error "Login to leetcode from Chrome and try again"
 
 decryptChromeCookie :: B.ByteString -> IO String
 decryptChromeCookie byteStr = do
@@ -54,6 +61,40 @@ decryptChromeCookie byteStr = do
       let numPad = B.last decrypted
       let decryptedClean = B.take (B.length decrypted - fromIntegral numPad) decrypted
       return $ BU.toString decryptedClean
+
+writeCookieToFile :: [(String, String)] -> IO ()
+writeCookieToFile pairs = do
+  let jsonObject = object (map (\tup -> T.pack (fst tup) .= T.pack (snd tup)) pairs)
+  configPath <- getConfigPath
+  Yaml.encodeFile configPath jsonObject
+
+getConfigFromFile :: Bool -> IO (B.ByteString, B.ByteString)
+getConfigFromFile hasRetry = do
+  configPath <- getConfigPath
+  bool <- doesFileExist configPath
+  case (bool, hasRetry) of
+    (False, False) -> do
+      getChromeCookie
+      getConfigFromFile True
+    (False, True) -> error "Cannot acquire credientials"
+    (True, _) -> do
+      eitherDecode <- Yaml.decodeFile configPath :: IO (Maybe Value)
+      case (eitherDecode, hasRetry) of
+        (Nothing, False) -> do
+          getChromeCookie
+          getConfigFromFile True
+        (Nothing, True) -> do
+          error "Cannot acquire credientials"
+        (Just yamlValue, _) -> do
+          let csrfToken = yamlValue ^? key "csrftoken"
+          let leetcodeSession = yamlValue ^? key "LEETCODE_SESSION"
+          case (csrfToken, leetcodeSession, hasRetry) of
+            (Just (String csrfToken), Just (String leetcodeSession), _) -> do
+              return (BU.fromString $ T.unpack csrfToken, BU.fromString $ T.unpack leetcodeSession)
+            (_, _, False) -> do
+              getChromeCookie
+              getConfigFromFile True
+            (_, _, True) -> error "Cannot acquire credientials"
 
 newtype Key a = Key B.ByteString
   deriving (Show, Eq)
