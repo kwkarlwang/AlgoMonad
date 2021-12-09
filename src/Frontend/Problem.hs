@@ -6,12 +6,13 @@ import Backend.Problem
     Status (Cleared, NotAttempted, NotCleared),
   )
 import Brick
-  ( Padding (Pad),
+  ( Padding (Max, Pad),
     TextWidth (textWidth),
     ViewportType (Vertical),
     Widget,
     continue,
     hBox,
+    padLeft,
     padLeftRight,
     padRight,
     str,
@@ -23,19 +24,20 @@ import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.List as BL hiding (reverse)
 import Data.List (intercalate)
 import Data.Vector as V hiding ((++))
-import Frontend.State (NewState, ResourceName (ProblemView), TuiState (TuiState, tuiStateProblems))
+import Frontend.State (NewState, ResourceName (ProblemView), TuiState (TuiState))
 import Frontend.Utils (drawGreen, drawRed, drawStr, drawYellow, floatDiv, floatRound)
 
 renderProblem :: Bool -> BL.List ResourceName Problem -> Widget ResourceName
 renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemList
   where
-    renderFunc bool problem = hBox $ Prelude.map (\f -> f bool problem) components ++ [drawStr False " "]
-    components =
-      [ renderStatus,
-        renderTitle maxTitleWidth,
-        renderDifficulty maxDifficultyWidth,
-        renderPercent maxPercentWidth
-      ]
+    renderFunc bool problem = hBox components
+      where
+        components =
+          [ renderStatus bool problem,
+            padRight Max $ renderTitle maxTitleWidth bool problem,
+            renderDifficulty maxDifficultyWidth bool problem,
+            renderPercent maxPercentWidth bool problem
+          ]
 
     problemVector = BL.listElements problemList
     maxTitleWidth = V.maximum $ V.map (textWidth . showTitle) problemVector
@@ -64,7 +66,7 @@ renderTitle maxPad bool problem = padRight (Pad (maxPad - titleWidth)) widget
     titleWidth = textWidth titleString
 
 renderDifficulty :: Int -> Bool -> Problem -> Widget ResourceName
-renderDifficulty maxPad bool problem = padRight (Pad (maxPad - difficultyWidth + 2)) widget
+renderDifficulty maxPad bool problem = padRight (Pad (maxPad - difficultyWidth + 4)) widget
   where
     difficultyString = showDifficulty problem
     widget =

@@ -38,6 +38,7 @@ dependencies:
   - yaml == 0.11.7.0
   - mtl == 2.2.2
   - containers == 0.6.5.1
+  - vector-algorithms == 0.6.0.4
 
 library:
   source-dirs: src

@@ -7,7 +7,9 @@ import Control.Lens hiding ((.=))
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Aeson
 import Data.Aeson.Lens
+import Data.Ord (comparing)
 import Data.Vector as V hiding (init, tail)
+import Data.Vector.Algorithms.Intro (sortBy)
 import Network.HTTP.Req
 
 data Status = Cleared | NotCleared | NotAttempted deriving (Eq)
@@ -71,5 +73,5 @@ getProblems = do
     _ ->
       let problems = reqData ^? key "stat_status_pairs"
        in case problems of
-            Just (Array array) -> V.reverse $ V.map getProblem array
+            Just (Array array) -> V.modify (sortBy (comparing pid)) $ V.map getProblem array
             _ -> V.empty

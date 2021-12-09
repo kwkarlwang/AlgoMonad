@@ -12,11 +12,11 @@ data Focus = ProblemFocus | DetailFocus | SearchFocus deriving (Show, Eq)
 
 data TuiState = TuiState
   { tuiStateUserInfo :: UserInfo,
-    tuiStateProblems :: V.Vector Problem,
     tuiStateProblemList :: BL.List ResourceName Problem,
     tuiStateCurrentFocus :: Focus,
     tuiStateProblemDetail :: Maybe ProblemDetailList,
-    tuiStateSearch :: E.Editor String ResourceName
+    tuiStateSearch :: E.Editor String ResourceName,
+    tuiStateMessage :: Maybe String
   }
   deriving (Show)
 
