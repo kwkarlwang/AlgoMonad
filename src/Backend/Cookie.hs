@@ -19,7 +19,7 @@ import Data.Yaml (decodeFile)
 import qualified Data.Yaml as Yaml
 import Database.SQLite.Simple
 import System.Directory (doesFileExist, getHomeDirectory)
-import qualified System.Keyring as Keyring (Password (Password), Service (Service), Username (Username), getPassword)
+import qualified System.Process as P (readProcess)
 
 getConfigPath :: IO FilePath
 getConfigPath = do
@@ -48,19 +48,16 @@ getChromeCookie = do
 
 decryptChromeCookie :: B.ByteString -> IO String
 decryptChromeCookie byteStr = do
-  password <- Keyring.getPassword (Keyring.Service "Chrome Safe Storage") (Keyring.Username "Chrome")
-  case password of
-    Nothing -> error "Decrypt Cookie Failed"
-    Just (Keyring.Password password) -> do
-      let salt = "saltysalt" :: String
-      let iterations = 1003
-      let key = fastPBKDF2_SHA1 (Parameters iterations 16) (BU.fromString password) (BU.fromString salt) :: B.ByteString
-      let encryptedValue = B.drop 3 byteStr
-      let iv = BU.fromString $ concat $ replicate 16 " "
-      let decrypted = decrypt' CBCdecrypt key (makeIV iv) encryptedValue
-      let numPad = B.last decrypted
-      let decryptedClean = B.take (B.length decrypted - fromIntegral numPad) decrypted
-      return $ BU.toString decryptedClean
+  password <- init <$> P.readProcess "security" ["find-generic-password", "-w", "-s", "Chrome Safe Storage", "-a", "Chrome"] []
+  let salt = "saltysalt" :: String
+  let iterations = 1003
+  let key = fastPBKDF2_SHA1 (Parameters iterations 16) (BU.fromString password) (BU.fromString salt) :: B.ByteString
+  let encryptedValue = B.drop 3 byteStr
+  let iv = BU.fromString $ concat $ replicate 16 " "
+  let decrypted = decrypt' CBCdecrypt key (makeIV iv) encryptedValue
+  let numPad = B.last decrypted
+  let decryptedClean = B.take (B.length decrypted - fromIntegral numPad) decrypted
+  return $ BU.toString decryptedClean
 
 writeCookieToFile :: [(String, String)] -> IO ()
 writeCookieToFile pairs = do
