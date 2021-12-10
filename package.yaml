@@ -35,7 +35,6 @@ dependencies:
   - cryptonite == 0.29
   - utf8-string == 1.0.2
   - yaml == 0.11.7.0
-  - mtl == 2.2.2
   - containers == 0.6.5.1
   - vector-algorithms == 0.6.0.4
   - process == 1.6.13.2

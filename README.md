@@ -87,6 +87,8 @@ Here is a list of essential libraries needed for this program
 - [brick](https://hackage.haskell.org/package/brick): use to make TUI
 - [cryptonite](https://hackage.haskell.org/package/cryptonite): to decrypt the Chrome cookies
 - [sqlite-simple](https://hackage.haskell.org/package/sqlite-simple): to connect the sqlite cookie database
+- [yaml](https://hackage.haskell.org/package/yaml): to extract the key value pair from yaml file
+- [aeson](https://hackage.haskell.org/package/yaml): to handle JSON object from the response
 
 ## Goals
 
