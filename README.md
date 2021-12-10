@@ -77,22 +77,16 @@ Some of the key components are the following:
 
 ## Challenges
 
-Some of the challenges are the following:
-
-- Displaying cursor and scroll through problems. Initially, I was using external library **Cursor** to list the problems and show the cursor. However, with around 2000 questions, using this third part library is extremely slow and inefficient. Then I discover that Brick has a builtin component to display the cursor and the list. Using the component, I was able to successfully show the cursor in the list.
-
-- Getting user token from leetcode requires me to open the local sqllite cookie file and query the token, which I have yet explore. Currently the token is hardcoded. If there is not enough time, then I may need the user to hardcode their token into a config file.
-
-## Expectation
-
-I am first finishing the listing questions functionality, then downloading specific quesiton. After that, I am going to try to acquire the user token from the cookies. In the end, I will try to implement the submission functionality. I am confident that I can finish the first two. However, I might get to the submission functionality by deadline. If that is the case, then the submission functionality will be abandoned.
+The biggest challenge I have is to acquire the cookies from Browser. The location of the cookies are not only browser and platform depedent, but also the decryption of the cookies differs depending on the platforms.
 
 ## Libraries
 
-Here is a list of libraries needed for this program
+Here is a list of essential libraries needed for this program
 
 - [req](https://hackage.haskell.org/package/req): use to make request
 - [brick](https://hackage.haskell.org/package/brick): use to make TUI
+- [cryptonite](https://hackage.haskell.org/package/cryptonite): to decrypt the Chrome cookies
+- [sqlite-simple](https://hackage.haskell.org/package/sqlite-simple): to connect the sqlite cookie database
 
 ## Goals
 
