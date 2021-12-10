@@ -85,8 +85,8 @@ The biggest challenge I have is to acquire the cookies from Browser. The locatio
 
 Here is a list of essential libraries needed for this program
 
-- [req](https://hackage.haskell.org/package/req): use to make request
-- [brick](https://hackage.haskell.org/package/brick): use to make TUI
+- [req](https://hackage.haskell.org/package/req): to make request
+- [brick](https://hackage.haskell.org/package/brick): to make TUI
 - [cryptonite](https://hackage.haskell.org/package/cryptonite): to decrypt the Chrome cookies
 - [sqlite-simple](https://hackage.haskell.org/package/sqlite-simple): to connect the sqlite cookie database
 - [yaml](https://hackage.haskell.org/package/yaml): to extract the key value pair from yaml file
