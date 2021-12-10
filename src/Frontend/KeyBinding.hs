@@ -13,8 +13,9 @@ import Brick
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Data.Char (isDigit, toLower)
+import Data.Char (isDigit, isUpper, toLower)
 import Data.List (isInfixOf)
+import Debug.Trace (traceM)
 import Frontend.Problem (showTitle)
 import Frontend.State
   ( Focus (DetailFocus, ProblemFocus, SearchFocus),
@@ -67,6 +68,21 @@ handleProblemList s e = do
   return s {tuiStateProblemList = newProblemList}
 
 handleProblemDetail :: TuiState -> Event -> EventM ResourceName TuiState
+handleProblemDetail s e@(EvKey (KChar char) []) = do
+  let currentFocus = tuiStateCurrentFocus s
+  let oldProblemDetail = tuiStateProblemDetail s
+  case (oldProblemDetail, currentFocus, isUpper char) of
+    (Just oldProblemDetail, DetailFocus, True) -> do
+      let oldCodeDefinitionList = codeDefinitionList oldProblemDetail
+      let newCodeDefinitionList = BL.listFindBy (\tup -> (toLower . head) (fst tup) == toLower char) oldCodeDefinitionList
+      let newProblemDetail = ProblemDetailList {slug = slug oldProblemDetail, content = content oldProblemDetail, codeDefinitionList = newCodeDefinitionList}
+      return $ s {tuiStateProblemDetail = Just newProblemDetail}
+    (Just oldProblemDetail, DetailFocus, False) -> do
+      let oldCodeDefinitionList = codeDefinitionList oldProblemDetail
+      newCodeDefinitionList <- BL.handleListEventVi (\_ l -> return l) e oldCodeDefinitionList
+      let newProblemDetail = ProblemDetailList {slug = slug oldProblemDetail, content = content oldProblemDetail, codeDefinitionList = newCodeDefinitionList}
+      return $ s {tuiStateProblemDetail = Just newProblemDetail}
+    _ -> return s
 handleProblemDetail s e = do
   let currentFocus = tuiStateCurrentFocus s
   let oldProblemDetail = tuiStateProblemDetail s

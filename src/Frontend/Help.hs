@@ -2,13 +2,16 @@ module Frontend.Help where
 
 import Brick (Widget, hBox, padLeftRight, vBox)
 import Frontend.State (ResourceName)
-import Frontend.Utils (drawGreen, drawStr, drawYellow)
+import Frontend.Utils (drawGreen, drawRed, drawStr, drawYellow)
 
 renderHelp :: Widget ResourceName
 renderHelp = padLeftRight 2 $ hBox [vBox $ map (\tup -> drawYellow False $ fst tup ++ " ") help, vBox $ map (drawStr False . snd) help]
 
 help =
-  [ ("h", "go back"),
+  [ ("Pro tip", "select language with SHIFT+"),
+    ("", "prefix of the language"),
+    (" ", " "),
+    ("h", "go back"),
     ("j", "move down"),
     ("k", "move up"),
     ("l", "select question"),

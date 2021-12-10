@@ -4,7 +4,7 @@
 
 Karl Wang
 
-## Idea
+## Introduction
 
 AlgoMoond is a haskell TUI that allows user to download LeetCode questions through the TUI to their local machines, edit them in their favorite editors, ansubmit them through the TUI.
 
