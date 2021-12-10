@@ -143,12 +143,14 @@ handleEvent s SearchFocus (EvKey KEnter []) = do
   let search = tuiStateSearch s
   let problemList = tuiStateProblemList s
   let searchText = head $ E.getEditContents search
-  let filterCondition p = case head searchText of
-        '=' -> do
-          let problemId = read $ tail searchText :: Integer
+  let filterCondition p = case (head searchText, tail searchText) of
+        (_, "") -> do
+          False
+        ('=', searchText) -> do
+          let problemId = read searchText :: Integer
           problemId == pid p
-        _ -> do
-          let content = map toLower $ tail searchText
+        (_, searchText) -> do
+          let content = map toLower searchText
           content `isInfixOf` map toLower (showTitle p)
   let newProblemList = BL.listFindBy filterCondition problemList
   continue s {tuiStateCurrentFocus = ProblemFocus, tuiStateProblemList = newProblemList}

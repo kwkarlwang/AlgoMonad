@@ -16,9 +16,9 @@ Clone the repository and run `stack install` to install the TUI. To run the test
 
 ## Guide
 
-### Login Credientials
+### Login Credentials
 
-AlgoMonad needs to use the cookie credientials from leetcode in order to acquire user leetcode information. If you are on MacOS, you can either acquire the credientials manually or automatically. If you are on other platforms, currently you can only acquire the credientials manually.
+AlgoMonad needs to use the cookie credentials from leetcode in order to acquire user leetcode information. If you are on MacOS, you can either acquire the credientials manually or automatically. If you are on other platforms, currently you can only acquire the credientials manually.
 
 #### Manual
 
@@ -52,7 +52,7 @@ csrftoken: W43GFtqFER8nADnf9apPmfUTYqrkPRz1XN6V712GAJWuE1RxUThv9QlQyGlb5Prh
 
 ### Usage
 
-With the credientials acquired, now run `algomonad` on the shell. You should be greeted with the following interface
+With the credentials acquired, now run `algomonad` on the shell. You should be greeted with the following interface
 
 ![List](./assets/List.png)
 
@@ -73,7 +73,9 @@ Some of the key components are the following:
 
 - **UserInfo**: get the username and whether the user has leetcode premium.
 - **Problem**: get the list of problems and their statistics.
-- **ProblemDetail**: get the code and writeup of the problem.
+- **ProblemDetail**: get the code and write up of the problem.
+
+![Arch](./assets/Arch.png)
 
 ## Challenges
 
@@ -100,4 +102,4 @@ Here is a list of essential libraries needed for this program
 ## Inspirations
 
 - [leetcode-cli](https://github.com/skygragon/leetcode-cli): Main source of inspiration. However, this is just a pure cli instead of a TUI. Implemented in javascript
-- [vscode-leetcode](https://github.com/LeetCode-OpenSource/vscode-leetcode): A GUI for LeetCode. However, only available on VSCode. Implemented in javascript.
+  e [vscode-leetcode](https://github.com/LeetCode-OpenSource/vscode-leetcode): A GUI for LeetCode. However, only available on VSCode. Implemented in javascript.
