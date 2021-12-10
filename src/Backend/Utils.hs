@@ -4,7 +4,6 @@ module Backend.Utils where
 
 import Backend.Cookie (getConfigFromFile)
 import Control.Lens hiding ((.=))
-import Control.Monad.State
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.ByteString (ByteString)
