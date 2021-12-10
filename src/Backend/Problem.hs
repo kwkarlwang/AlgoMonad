@@ -34,23 +34,30 @@ data Problem = Problem
   deriving (Eq, Show)
 
 requestProblems :: (FromJSON a) => IO (Req (JsonResponse a))
-requestProblems = do
+requestProblems =
   req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse <$> getCredentials
 
-getProblem :: Value -> Problem
-getProblem value = problem
-  where
-    pid = value ^? key "stat" . key "frontend_question_id"
-    title = value ^? key "stat" . key "question__title"
-    difficulty = value ^? key "difficulty" . key "level"
-    paidOnly = value ^? key "paid_only"
-    totalAccept = value ^? key "stat" . key "total_acs"
-    totalSubmit = value ^? key "stat" . key "total_submitted"
-    status = value ^? key "status"
-    slug = value ^? key "stat" . key "question__title_slug"
-    problem = case (pid, title, difficulty, paidOnly, totalAccept, totalSubmit, status, slug) of
-      (Just (Integer pid), Just (String title), Just (Integer difficulty), Just (Bool paidOnly), Just (Integer totalAccept), Just (Integer totalSubmit), status, Just (String slug)) ->
-        Problem pid (init . tail $ show title) diff paidOnly totalAccept totalSubmit stat (init . tail $ show slug)
+getProblem :: Value -> Maybe Problem
+getProblem value = do
+  pid <- value ^? key "stat" . key "frontend_question_id"
+  title <- value ^? key "stat" . key "question__title"
+  difficulty <- value ^? key "difficulty" . key "level"
+  paidOnly <- value ^? key "paid_only"
+  totalAccept <- value ^? key "stat" . key "total_acs"
+  totalSubmit <- value ^? key "stat" . key "total_submitted"
+  let status = value ^? key "status"
+  slug <- value ^? key "stat" . key "question__title_slug"
+  case (pid, title, difficulty, paidOnly, totalAccept, totalSubmit, status, slug) of
+    ( Integer pid,
+      String title,
+      Integer difficulty,
+      Bool paidOnly,
+      Integer totalAccept,
+      Integer totalSubmit,
+      status,
+      String slug
+      ) ->
+        return $ Problem pid (init . tail $ show title) diff paidOnly totalAccept totalSubmit stat (init . tail $ show slug)
         where
           diff = case difficulty of
             1 -> Easy
@@ -61,7 +68,7 @@ getProblem value = problem
             Just (String "notac") -> NotCleared
             Just (String "ac") -> Cleared
             _ -> NotAttempted
-      _ -> error "failed to key"
+    _ -> Nothing
 
 getProblems :: IO (V.Vector Problem)
 getProblems = do
@@ -73,5 +80,8 @@ getProblems = do
     _ ->
       let problems = reqData ^? key "stat_status_pairs"
        in case problems of
-            Just (Array array) -> V.modify (sortBy (comparing pid)) $ V.map getProblem array
+            Just (Array array) -> do
+              case V.mapM getProblem array of
+                Just problems -> V.modify (sortBy (comparing pid)) problems
+                Nothing -> V.empty
             _ -> V.empty

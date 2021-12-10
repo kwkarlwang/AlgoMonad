@@ -8,8 +8,6 @@ import Backend.UserInfo (UserInfo, getUserInfo, requestUserInfo)
 import Brick
   ( App (..),
     BrickEvent (VtyEvent),
-    EventM,
-    Next,
     Padding (Max),
     Widget,
     attrMap,
@@ -19,14 +17,12 @@ import Brick
     emptyWidget,
     fg,
     hBox,
-    hLimit,
     hLimitPercent,
     halt,
     padBottom,
     showFirstCursor,
     str,
     vBox,
-    vLimitPercent,
     withAttr,
     (<=>),
   )

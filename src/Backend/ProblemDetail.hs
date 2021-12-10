@@ -22,7 +22,7 @@ data ProblemDetail = ProblemDetail
     content :: String,
     codeDefinitionVector :: V.Vector (String, String)
   }
-  deriving (Show)
+  deriving (Eq, Show)
 
 langToExtension =
   [ ("c", ".c"),
@@ -69,12 +69,22 @@ valueToText :: Value -> T.Text
 valueToText (String x) = x
 valueToText _ = error "Not Text"
 
-makeProblemDetail :: Array -> Maybe (V.Vector (String, String))
-makeProblemDetail codeDefinition =
+makeProblemDetailCode :: Array -> Maybe (V.Vector (String, String))
+makeProblemDetailCode codeDefinition =
   do
     codeKey <- V.mapM (\value -> T.unpack . valueToText <$> value ^? key "value") codeDefinition
     codeValue <- V.mapM (\value -> T.unpack . valueToText <$> value ^? key "defaultCode") codeDefinition
     return $ V.zip codeKey codeValue
+
+extractProblemDetail :: String -> Value -> Maybe ProblemDetail
+extractProblemDetail slug value = do
+  questionData <- value ^? key "question"
+  content <- T.unpack . valueToText <$> questionData ^? key "content"
+  codeDefinitionStr <- valueToText <$> questionData ^? key "codeDefinition"
+  let codeDefinitionText = TLE.encodeUtf8 $ TL.fromStrict codeDefinitionStr
+  codeDefinitionValue <- decode codeDefinitionText :: Maybe Array
+  codeDefinitionVector <- makeProblemDetailCode codeDefinitionValue
+  return $ ProblemDetail {..}
 
 getProblemDetail :: String -> IO ProblemDetail
 getProblemDetail slug = do
@@ -82,17 +92,9 @@ getProblemDetail slug = do
   reqData <- getResponseBody request
   if reqData == Null
     then error "Need to re login in the browser"
-    else case ( do
-                  questionData <- reqData ^? key "question"
-                  content <- T.unpack . valueToText <$> questionData ^? key "content"
-                  codeDefinitionStr <- valueToText <$> questionData ^? key "codeDefinition"
-                  let codeDefinitionText = TLE.encodeUtf8 $ TL.fromStrict codeDefinitionStr
-                  codeDefinitionValue <- decode codeDefinitionText :: Maybe Array
-                  codeDefinitionVector <- makeProblemDetail codeDefinitionValue
-                  return $ ProblemDetail {..}
-              ) of
+    else case extractProblemDetail slug reqData of
       Just x -> return x
-      Nothing -> error "error parsing"
+      Nothing -> error "error parsing problem detail"
 
 writeProblemToFile :: String -> String -> (String, String) -> IO ()
 writeProblemToFile slug content codeDefinitionPair = do
