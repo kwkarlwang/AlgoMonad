@@ -89,6 +89,19 @@ handleEvent s ProblemFocus e@(EvKey (KChar '/') []) = do
 handleEvent s ProblemFocus e@(EvKey (KChar '=') []) = do
   newState <- handleSearch s e
   continue newState
+handleEvent s ProblemFocus e@(EvKey (KChar 'n') []) = do
+  let search = tuiStateSearch s
+  let problemList = tuiStateProblemList s
+  let searchText = head $ E.getEditContents search
+  let filterCondition p = case head searchText of
+        '=' -> do
+          let problemId = read $ tail searchText :: Integer
+          problemId == pid p
+        _ -> do
+          let content = map toLower $ tail searchText
+          content `isInfixOf` map toLower (showTitle p)
+  let newProblemList = BL.listFindBy filterCondition problemList
+  continue s {tuiStateProblemList = newProblemList}
 handleEvent s ProblemFocus e = do
   newState <- handleProblemList s e
   continue newState

@@ -15,6 +15,7 @@ help =
     ("enter", "download question"),
     ("/", "search by title"),
     ("=", "search by id"),
+    ("n", "search next occurance"),
     ("g", "move to top"),
     ("G", "move to bottom"),
     ("ctrl-d", "move half page down"),
