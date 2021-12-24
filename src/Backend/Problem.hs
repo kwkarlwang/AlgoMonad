@@ -34,8 +34,7 @@ data Problem = Problem
   deriving (Eq, Show)
 
 requestProblems :: (FromJSON a) => IO (Req (JsonResponse a))
-requestProblems =
-  req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse <$> getCredentials
+requestProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse <$> getCredentials
 
 getProblem :: Value -> Maybe Problem
 getProblem value = do

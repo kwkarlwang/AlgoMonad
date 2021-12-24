@@ -21,7 +21,8 @@ data TuiState = TuiState
   deriving (Show)
 
 data ProblemDetailList = ProblemDetailList
-  { slug :: String,
+  { pid :: Integer,
+    slug :: String,
     content :: String,
     codeDefinitionList :: BL.List ResourceName (String, String)
   }

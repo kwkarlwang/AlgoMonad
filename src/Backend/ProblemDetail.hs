@@ -18,36 +18,15 @@ import Network.HTTP.Req
 import qualified System.Directory as DIR
 
 data ProblemDetail = ProblemDetail
-  { slug :: String,
+  { pid :: Integer,
+    slug :: String,
     content :: String,
     codeDefinitionVector :: V.Vector (String, String)
   }
   deriving (Eq, Show)
 
-langToExtension =
-  [ ("c", ".c"),
-    ("cpp", ".cpp"),
-    ("csharp", ".cs"),
-    ("golang", ".go"),
-    ("java", ".java"),
-    ("javascript", ".js"),
-    ("typescript", ".ts"),
-    ("kotlin", ".kt"),
-    ("php", ".php"),
-    ("python", ".py"),
-    ("python3", ".py"),
-    ("ruby", ".rb"),
-    ("rust", ".rs"),
-    ("scala", ".scala"),
-    ("swift", ".swift"),
-    ("racket", ".rkt"),
-    ("erlang", ".erl"),
-    ("elixir", ".exs")
-  ]
-
 requestProblemDetail :: (FromJSON a) => String -> IO (Req (JsonResponse a))
-requestProblemDetail slug = do
-  req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse <$> getCredentials
+requestProblemDetail slug = req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse <$> getCredentials
   where
     payload =
       object
@@ -76,8 +55,8 @@ makeProblemDetailCode codeDefinition =
     codeValue <- V.mapM (\value -> T.unpack . valueToText <$> value ^? key "defaultCode") codeDefinition
     return $ V.zip codeKey codeValue
 
-extractProblemDetail :: String -> Value -> Maybe ProblemDetail
-extractProblemDetail slug value = do
+extractProblemDetail :: String -> Value -> Integer -> Maybe ProblemDetail
+extractProblemDetail slug value pid = do
   questionData <- value ^? key "question"
   content <- T.unpack . valueToText <$> questionData ^? key "content"
   codeDefinitionStr <- valueToText <$> questionData ^? key "codeDefinition"
@@ -86,23 +65,23 @@ extractProblemDetail slug value = do
   codeDefinitionVector <- makeProblemDetailCode codeDefinitionValue
   return $ ProblemDetail {..}
 
-getProblemDetail :: String -> IO ProblemDetail
-getProblemDetail slug = do
+getProblemDetail :: String -> Integer -> IO ProblemDetail
+getProblemDetail slug pid = do
   request <- requestProblemDetail slug
   reqData <- getResponseBody request
   if reqData == Null
     then error "Need to re login in the browser"
-    else case extractProblemDetail slug reqData of
+    else case extractProblemDetail slug reqData pid of
       Just x -> return x
       Nothing -> error "error parsing problem detail"
 
-writeProblemToFile :: String -> String -> (String, String) -> IO ()
-writeProblemToFile slug content codeDefinitionPair = do
-  let folderPath = "./" ++ slug ++ ".algomonad"
+writeProblemToFile :: String -> String -> (String, String) -> Integer -> IO ()
+writeProblemToFile slug content codeDefinitionPair pid = do
+  let folderPath = "./" ++ show pid ++ "." ++ slug ++ ".algomonad"
   let contentText = content
   let (codeLang, codeText) = codeDefinitionPair
-  let codeFileExtension = snd $ head $ filter (\tup -> fst tup == codeLang) langToExtension
+  let codeFileExtension = langToExtension codeLang
   DIR.createDirectoryIfMissing True folderPath
-  writeFile (folderPath ++ "/" ++ slug ++ ".html") contentText
-  writeFile (folderPath ++ "/" ++ slug ++ codeFileExtension) codeText
+  writeFile (folderPath ++ "/" ++ "writeup.html") contentText
+  writeFile (folderPath ++ "/" ++ codeLang ++ codeFileExtension) codeText
   return ()

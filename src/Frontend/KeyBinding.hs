@@ -1,6 +1,5 @@
 module Frontend.KeyBinding where
 
-import Backend.Problem (Problem (pid))
 import qualified Backend.Problem as P
 import qualified Backend.ProblemDetail as PD
 import Brick
@@ -20,7 +19,7 @@ import Frontend.Problem (showTitle)
 import Frontend.State
   ( Focus (DetailFocus, ProblemFocus, SearchFocus),
     NewState,
-    ProblemDetailList (ProblemDetailList, codeDefinitionList, content, slug),
+    ProblemDetailList (ProblemDetailList, codeDefinitionList, content, pid, slug),
     ResourceName (DetailView, ProblemView, SearchView),
     TuiState
       ( TuiState,
@@ -45,10 +44,11 @@ handleFocusDetail s = do
   case maybeProblem of
     Nothing -> return s
     Just (idx, problem) -> do
-      problemDetail <- liftIO $ PD.getProblemDetail $ P.slug problem
+      problemDetail <- liftIO $ PD.getProblemDetail (P.slug problem) (P.pid problem)
       let problemDetailList =
             ProblemDetailList
-              { slug = PD.slug problemDetail,
+              { pid = PD.pid problemDetail,
+                slug = PD.slug problemDetail,
                 content = PD.content problemDetail,
                 codeDefinitionList = BL.list DetailView (PD.codeDefinitionVector problemDetail) 1
               }
@@ -75,12 +75,24 @@ handleProblemDetail s e@(EvKey (KChar char) []) = do
     (Just oldProblemDetail, DetailFocus, True) -> do
       let oldCodeDefinitionList = codeDefinitionList oldProblemDetail
       let newCodeDefinitionList = BL.listFindBy (\tup -> (toLower . head) (fst tup) == toLower char) oldCodeDefinitionList
-      let newProblemDetail = ProblemDetailList {slug = slug oldProblemDetail, content = content oldProblemDetail, codeDefinitionList = newCodeDefinitionList}
+      let newProblemDetail =
+            ProblemDetailList
+              { slug = slug oldProblemDetail,
+                content = content oldProblemDetail,
+                codeDefinitionList = newCodeDefinitionList,
+                pid = pid oldProblemDetail
+              }
       return $ s {tuiStateProblemDetail = Just newProblemDetail}
     (Just oldProblemDetail, DetailFocus, False) -> do
       let oldCodeDefinitionList = codeDefinitionList oldProblemDetail
       newCodeDefinitionList <- BL.handleListEventVi (\_ l -> return l) e oldCodeDefinitionList
-      let newProblemDetail = ProblemDetailList {slug = slug oldProblemDetail, content = content oldProblemDetail, codeDefinitionList = newCodeDefinitionList}
+      let newProblemDetail =
+            ProblemDetailList
+              { slug = slug oldProblemDetail,
+                content = content oldProblemDetail,
+                codeDefinitionList = newCodeDefinitionList,
+                pid = pid oldProblemDetail
+              }
       return $ s {tuiStateProblemDetail = Just newProblemDetail}
     _ -> return s
 handleProblemDetail s e = do
@@ -90,7 +102,13 @@ handleProblemDetail s e = do
     (Just oldProblemDetail, DetailFocus) -> do
       let oldCodeDefinitionList = codeDefinitionList oldProblemDetail
       newCodeDefinitionList <- BL.handleListEventVi (\_ l -> return l) e oldCodeDefinitionList
-      let newProblemDetail = ProblemDetailList {slug = slug oldProblemDetail, content = content oldProblemDetail, codeDefinitionList = newCodeDefinitionList}
+      let newProblemDetail =
+            ProblemDetailList
+              { slug = slug oldProblemDetail,
+                content = content oldProblemDetail,
+                codeDefinitionList = newCodeDefinitionList,
+                pid = pid oldProblemDetail
+              }
       return $ s {tuiStateProblemDetail = Just newProblemDetail}
     _ -> return s
 
@@ -112,7 +130,7 @@ handleEvent s ProblemFocus e@(EvKey (KChar 'n') []) = do
   let filterCondition p = case head searchText of
         '=' -> do
           let problemId = read $ tail searchText :: Integer
-          problemId == pid p
+          problemId == P.pid p
         _ -> do
           let content = map toLower $ tail searchText
           content `isInfixOf` map toLower (showTitle p)
@@ -134,7 +152,7 @@ handleEvent s DetailFocus (EvKey KEnter []) = do
       case currentCodePair of
         Nothing -> continue s
         Just (_, currentCodePair) -> do
-          liftIO $ PD.writeProblemToFile (slug problemDetail) (content problemDetail) currentCodePair
+          liftIO $ PD.writeProblemToFile (slug problemDetail) (content problemDetail) currentCodePair (pid problemDetail)
           continue s {tuiStateMessage = Just "Download successful!"}
 handleEvent s DetailFocus e = do
   newState <- handleProblemDetail s e
@@ -148,7 +166,7 @@ handleEvent s SearchFocus (EvKey KEnter []) = do
           False
         ('=', searchText) -> do
           let problemId = read searchText :: Integer
-          problemId == pid p
+          problemId == P.pid p
         (_, searchText) -> do
           let content = map toLower searchText
           content `isInfixOf` map toLower (showTitle p)
