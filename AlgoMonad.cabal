@@ -29,6 +29,7 @@ library
       Backend.Problem
       Backend.ProblemDetail
       Backend.Submission
+      Backend.SubmissionDetail
       Backend.UserInfo
       Backend.Utils
       Frontend.App
@@ -36,7 +37,11 @@ library
       Frontend.KeyBinding
       Frontend.Problem
       Frontend.ProblemDetail
+      Frontend.Render
       Frontend.State
+      Frontend.Submission
+      Frontend.SubmissionDetail
+      Frontend.Tab
       Frontend.UserInfo
       Frontend.Utils
   other-modules:

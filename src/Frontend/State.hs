@@ -2,21 +2,35 @@ module Frontend.State where
 
 import Backend.Problem (Difficulty, Problem (Problem), Status)
 import Backend.ProblemDetail (ProblemDetail (ProblemDetail))
+import Backend.Submission (Submission)
 import Backend.UserInfo (UserInfo)
 import Brick (App (..), BrickEvent (VtyEvent), EventM, Next)
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
 import qualified Data.Vector as V
 
-data Focus = ProblemFocus | DetailFocus | SearchFocus deriving (Show, Eq)
+data Focus
+  = ListFocus
+  | DetailFocus
+  | SearchFocus
+  deriving (Show, Eq)
+
+data Tab = DownloadTab | SubmissionTab deriving (Show, Eq)
 
 data TuiState = TuiState
   { tuiStateUserInfo :: UserInfo,
+    -- Download
     tuiStateProblemList :: BL.List ResourceName Problem,
-    tuiStateCurrentFocus :: Focus,
+    tuiStateDownloadFocus :: Focus,
     tuiStateProblemDetail :: Maybe ProblemDetailList,
-    tuiStateSearch :: E.Editor String ResourceName,
-    tuiStateMessage :: Maybe String
+    tuiStateDownloadSearch :: E.Editor String ResourceName,
+    tuiStateMessage :: Maybe String,
+    -- Submission
+    tuiStateSubmissionFocus :: Focus,
+    tuiStateSubmissionSearch :: E.Editor String ResourceName,
+    tuiStateSubmissionDetail :: Maybe (BL.List ResourceName FilePath),
+    tuiStateSubmissionList :: BL.List ResourceName Submission,
+    tuiStateTab :: Tab
   }
   deriving (Show)
 
@@ -31,7 +45,10 @@ data ProblemDetailList = ProblemDetailList
 type NewState = EventM ResourceName (Next TuiState)
 
 data ResourceName
-  = ProblemView
-  | DetailView
-  | SearchView
+  = DownloadListView
+  | DownloadDetailView
+  | DownloadSearchView
+  | SubmissionListView
+  | SubmissionDetailView
+  | SubmissionSearchView
   deriving (Eq, Ord, Show)

@@ -23,6 +23,7 @@ langExtensionPair =
     ("typescript", ".ts"),
     ("kotlin", ".kt"),
     ("php", ".php"),
+    ("python", ".py"),
     ("python3", ".py"),
     ("ruby", ".rb"),
     ("rust", ".rs"),
