@@ -54,5 +54,6 @@ buildInitialState =
           tuiStateSubmissionFocus = ListFocus,
           tuiStateSubmissionSearch = E.editor SubmissionSearchView (Just 1) "",
           tuiStateSubmissionDetail = Nothing,
+          tuiStateSubmissionReport = Nothing,
           tuiStateSubmissionList = BL.list SubmissionListView submissions 1
         }

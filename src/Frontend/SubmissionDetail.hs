@@ -15,7 +15,7 @@ renderSubmission = BL.renderList renderFunc
     renderFunc = renderLang
 
 renderLang :: Bool -> FilePath -> Widget ResourceName
-renderLang bool path = padLeftRight 1 widget
+renderLang bool path = widget
   where
     lang = T.unpack . head . T.splitOn "." . last . T.splitOn "/" . T.pack $ path
     widget = drawStr bool lang

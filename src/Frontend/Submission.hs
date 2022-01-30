@@ -12,7 +12,7 @@ renderSubmission = BL.renderList renderFunc
     renderFunc = renderTitle
 
 renderTitle :: Bool -> Submission -> Widget ResourceName
-renderTitle bool submission = padLeftRight 1 widget
+renderTitle bool submission = widget
   where
-    title = (show . pid) submission ++ "." ++ slug submission
+    title = " " ++ (show . pid) submission ++ "." ++ slug submission
     widget = drawStr bool title

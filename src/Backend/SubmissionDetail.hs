@@ -15,7 +15,7 @@ import Network.HTTP.Req
 
 data SubmissionDetail = SubmissionDetail
   { submissionLang :: String,
-    slug :: String,
+    submissionSlug :: String,
     content :: String,
     pid :: Integer
   }
@@ -23,31 +23,33 @@ data SubmissionDetail = SubmissionDetail
 
 data SubmissionReport
   = Accepted
-      { lang :: String,
+      { slug :: String,
+        lang :: String,
         totalCorrect :: Integer,
-        totalTestCases :: Integer,
+        totalTestcases :: Integer,
         statusMessage :: String,
         statusRuntime :: String,
         statusMemory :: String,
         runtimePercentile :: Float,
-        memoryPercentile :: Float,
-        stdOutput :: Maybe String
+        memoryPercentile :: Float
       }
   | WrongAnswer
-      { lang :: String,
+      { slug :: String,
+        lang :: String,
         totalCorrect :: Integer,
-        totalTestCases :: Integer,
-        lastTestCase :: String,
+        totalTestcases :: Integer,
+        lastTestcase :: String,
         statusMessage :: String,
         actualOutput :: String,
         expectedOutput :: String,
         stdOutput :: Maybe String
       }
   | RuntimeError
-      { lang :: String,
+      { slug :: String,
+        lang :: String,
         totalCorrect :: Integer,
-        totalTestCases :: Integer,
-        lastTestCase :: String,
+        totalTestcases :: Integer,
+        lastTestcase :: String,
         statusMessage :: String,
         actualOutput :: String,
         expectedOutput :: String,
@@ -55,20 +57,23 @@ data SubmissionReport
         stdOutput :: Maybe String
       }
   | CompileError
-      { lang :: String,
+      { slug :: String,
+        lang :: String,
         compileError :: String,
         statusMessage :: String
       }
   | LimitExceed
-      { lang :: String,
+      { slug :: String,
+        lang :: String,
         totalCorrect :: Integer,
-        totalTestCases :: Integer,
-        lastTestCase :: String,
+        totalTestcases :: Integer,
+        lastTestcase :: String,
         statusMessage :: String,
         stdOutput :: Maybe String
       }
   | Unknown
-      { lang :: String,
+      { slug :: String,
+        lang :: String,
         statusMessage :: String
       }
   deriving (Show)
@@ -76,8 +81,8 @@ data SubmissionReport
 requestSubmission :: (FromJSON a) => SubmissionDetail -> IO (Req (JsonResponse a))
 requestSubmission problem = req POST url (ReqBodyJson payload) jsonResponse <$> headers
   where
-    url = https "leetcode.com" /: "problems" /: T.pack (slug problem) /: "submit"
-    referer = header "Referer" $ "https://leetcode.com/problems/" <> BSU.fromString (slug problem) <> "/"
+    url = https "leetcode.com" /: "problems" /: T.pack (submissionSlug problem) /: "submit"
+    referer = header "Referer" $ "https://leetcode.com/problems/" <> BSU.fromString (submissionSlug problem) <> "/"
     headers = (referer <>) <$> getCredentials
     payload =
       object
@@ -97,6 +102,7 @@ readProblemFromFile :: FilePath -> String -> Integer -> IO SubmissionDetail
 readProblemFromFile path slug pid = do
   content <- readFile path
   let submissionLang = T.unpack . head . T.splitOn "." . last . T.splitOn "/" . T.pack $ path
+  let submissionSlug = slug
   return SubmissionDetail {..}
 
 -- extractProblemReport
@@ -115,29 +121,26 @@ getVerfication submissionId count = do
       getVerfication submissionId (count + 1)
     _ -> error "Verify submission timeout. Please try submitting again."
 
-extractAccepted :: Value -> SubmissionReport
-extractAccepted value = output
+extractAccepted :: Value -> String -> SubmissionReport
+extractAccepted value slug = output
   where
     lang = unpackString $ value ^? key "lang"
     totalCorrect = unpackInteger $ value ^? key "total_correct"
-    totalTestCases = unpackInteger $ value ^? key "total_testcases"
+    totalTestcases = unpackInteger $ value ^? key "total_testcases"
     statusMessage = unpackString $ value ^? key "status_msg"
     statusRuntime = unpackString $ value ^? key "status_runtime"
     statusMemory = unpackString $ value ^? key "status_memory"
     runtimePercentile = unpackFloat $ value ^? key "runtimePercentile"
     memoryPercentile = unpackFloat $ value ^? key "memoryPercentile"
-    stdOutput = case unpackString $ value ^? key "std_ouput" of
-      "" -> Nothing
-      x -> Just x
     output = Accepted {..}
 
-extractWrongAnswer :: Value -> SubmissionReport
-extractWrongAnswer value = output
+extractWrongAnswer :: Value -> String -> SubmissionReport
+extractWrongAnswer value slug = output
   where
     lang = unpackString $ value ^? key "lang"
     totalCorrect = unpackInteger $ value ^? key "total_correct"
-    totalTestCases = unpackInteger $ value ^? key "total_testcases"
-    lastTestCase = unpackString $ value ^? key "last_testcase"
+    totalTestcases = unpackInteger $ value ^? key "total_testcases"
+    lastTestcase = unpackString $ value ^? key "last_testcase"
     statusMessage = unpackString $ value ^? key "status_msg"
     actualOutput = unpackString $ value ^? key "code_output"
     expectedOutput = unpackString $ value ^? key "expected_output"
@@ -146,13 +149,13 @@ extractWrongAnswer value = output
       x -> Just x
     output = WrongAnswer {..}
 
-extractRuntimeError :: Value -> SubmissionReport
-extractRuntimeError value = output
+extractRuntimeError :: Value -> String -> SubmissionReport
+extractRuntimeError value slug = output
   where
     lang = unpackString $ value ^? key "lang"
     totalCorrect = unpackInteger $ value ^? key "total_correct"
-    totalTestCases = unpackInteger $ value ^? key "total_testcases"
-    lastTestCase = unpackString $ value ^? key "last_testcase"
+    totalTestcases = unpackInteger $ value ^? key "total_testcases"
+    lastTestcase = unpackString $ value ^? key "last_testcase"
     statusMessage = unpackString $ value ^? key "status_msg"
     actualOutput = unpackString $ value ^? key "code_output"
     expectedOutput = unpackString $ value ^? key "expected_output"
@@ -162,40 +165,41 @@ extractRuntimeError value = output
       x -> Just x
     output = RuntimeError {..}
 
-extractCompileError :: Value -> SubmissionReport
-extractCompileError value = output
+extractCompileError :: Value -> String -> SubmissionReport
+extractCompileError value slug = output
   where
     lang = unpackString $ value ^? key "lang"
     statusMessage = unpackString $ value ^? key "status_msg"
     compileError = unpackString $ value ^? key "full_compile_error"
     output = CompileError {..}
 
-extractLimitExceed :: Value -> SubmissionReport
-extractLimitExceed value = output
+extractLimitExceed :: Value -> String -> SubmissionReport
+extractLimitExceed value slug = output
   where
     lang = unpackString $ value ^? key "lang"
     totalCorrect = unpackInteger $ value ^? key "total_correct"
-    totalTestCases = unpackInteger $ value ^? key "total_testcases"
-    lastTestCase = unpackString $ value ^? key "last_testcase"
+    totalTestcases = unpackInteger $ value ^? key "total_testcases"
+    lastTestcase = unpackString $ value ^? key "last_testcase"
     statusMessage = unpackString $ value ^? key "status_msg"
     stdOutput = case unpackString $ value ^? key "std_ouput" of
       "" -> Nothing
       x -> Just x
     output = LimitExceed {..}
 
-extractUnknown value = output
+extractUnknown :: Value -> String -> SubmissionReport
+extractUnknown value slug = output
   where
     lang = unpackString $ value ^? key "lang"
     statusMessage = unpackString $ value ^? key "status_msg"
     output = Unknown {..}
 
-extractReport :: Value -> SubmissionReport
+extractReport :: Value -> String -> SubmissionReport
 extractReport value = statusCodeToReport statusCode value
   where
     statusCode = case value ^? key "status_code" of
       Just (Integer x) -> x
       _ -> 21
-    statusCodeToReport :: Integer -> Value -> SubmissionReport
+    statusCodeToReport :: Integer -> Value -> String -> SubmissionReport
     statusCodeToReport 10 = extractAccepted
     statusCodeToReport 11 = extractWrongAnswer
     statusCodeToReport 12 = extractLimitExceed
@@ -215,5 +219,5 @@ getSubmissionReports path slug pid = do
   case submissionId of
     Just (Integer submissionId) -> do
       reqData <- getVerfication submissionId 0
-      return $ extractReport reqData
+      return $ extractReport reqData slug
     _ -> error "cannot acquire submission"

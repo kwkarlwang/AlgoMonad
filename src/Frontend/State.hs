@@ -3,6 +3,7 @@ module Frontend.State where
 import Backend.Problem (Difficulty, Problem (Problem), Status)
 import Backend.ProblemDetail (ProblemDetail (ProblemDetail))
 import Backend.Submission (Submission)
+import Backend.SubmissionDetail (SubmissionReport)
 import Backend.UserInfo (UserInfo)
 import Brick (App (..), BrickEvent (VtyEvent), EventM, Next)
 import qualified Brick.Widgets.Edit as E
@@ -30,6 +31,7 @@ data TuiState = TuiState
     tuiStateSubmissionSearch :: E.Editor String ResourceName,
     tuiStateSubmissionDetail :: Maybe (BL.List ResourceName FilePath),
     tuiStateSubmissionList :: BL.List ResourceName Submission,
+    tuiStateSubmissionReport :: Maybe SubmissionReport,
     tuiStateTab :: Tab
   }
   deriving (Show)
