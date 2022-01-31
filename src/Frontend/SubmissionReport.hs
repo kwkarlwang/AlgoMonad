@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Frontend.SubmissionReport where
 
@@ -32,12 +31,12 @@ renderSubmissionReport RuntimeError {..} = widget
     testcasesWidget = renderTestcases totalCorrect totalTestcases
     lastTestcaseWidget = renderLastTestcaseError lastTestcase actualOutput expectedOutput stdOutput
     widget = vBox [slugWidget, statusWidget, testcasesWidget, lastTestcaseWidget]
--- TODO: Compile Error
 renderSubmissionReport CompileError {..} = widget
   where
     slugWidget = renderSlug slug
     statusWidget = renderStatus False statusMessage
-    widget = vBox [slugWidget, statusWidget]
+    compileErrorWidget = renderCompileError compileError
+    widget = vBox [slugWidget, statusWidget, compileErrorWidget]
 renderSubmissionReport LimitExceed {..} = widget
   where
     slugWidget = renderSlug slug
@@ -45,6 +44,11 @@ renderSubmissionReport LimitExceed {..} = widget
     testcasesWidget = renderTestcases totalCorrect totalTestcases
     lastTestcaseWidget = renderLastTestcaseLimit lastTestcase stdOutput
     widget = vBox [slugWidget, statusWidget, testcasesWidget, lastTestcaseWidget]
+renderSubmissionReport Unknown {..} = widget
+  where
+    slugWidget = renderSlug slug
+    statusWidget = renderStatus False statusMessage
+    widget = vBox [slugWidget, statusWidget]
 
 renderSlug :: String -> Widget ResourceName
 renderSlug = drawBoldCyan

@@ -2,7 +2,8 @@ module Frontend.KeyBinding where
 
 import qualified Backend.Problem as P
 import qualified Backend.ProblemDetail as PD
-import Backend.Submission (langPaths)
+import qualified Backend.Submission as S
+import qualified Backend.SubmissionDetail as SD
 import Brick
   ( BrickEvent (VtyEvent),
     EventM,
@@ -107,7 +108,7 @@ handleFocusSubmissionDetail s = do
   case maybeSubmission of
     Nothing -> return s
     Just (_, submission) -> do
-      let submissionDetailList = BL.list SubmissionDetailView (langPaths submission) 1
+      let submissionDetailList = BL.list SubmissionDetailView (S.langPaths submission) 1
       return s {tuiStateSubmissionFocus = DetailFocus, tuiStateSubmissionDetail = Just submissionDetailList}
 
 handleSubmissionList :: TuiState -> Event -> EventM ResourceName TuiState
@@ -116,13 +117,25 @@ handleSubmissionList s e = do
   newSubmissionList <- BL.handleListEventVi (\_ l -> return l) e oldSubmissionList
   return s {tuiStateSubmissionList = newSubmissionList}
 
+handleSubmissionDetail :: TuiState -> Event -> EventM ResourceName TuiState
 handleSubmissionDetail s e = do
+  -- WARNING: this line might not be necessary
   let currentFocus = tuiStateSubmissionFocus s
   let oldSubmissionDetail = tuiStateSubmissionDetail s
   case (oldSubmissionDetail, currentFocus) of
     (Just oldSubmissionDetail, DetailFocus) -> do
       newSubmissionDetail <- BL.handleListEventVi (\_ l -> return l) e oldSubmissionDetail
       return $ s {tuiStateSubmissionDetail = Just newSubmissionDetail}
+    _ -> return s
+
+handleSubmissionReport :: TuiState -> EventM ResourceName TuiState
+handleSubmissionReport s = do
+  let submissionDetail = BL.listSelectedElement <$> tuiStateSubmissionDetail s
+  let submission = BL.listSelectedElement $ tuiStateSubmissionList s
+  case (submission, submissionDetail) of
+    (Just (_, submission), Just (Just (_, filepath))) -> do
+      submissionReport <- liftIO $ SD.getSubmissionReport filepath (S.slug submission) (S.pid submission)
+      return $ s {tuiStateSubmissionReport = Just submissionReport}
     _ -> return s
 
 handleEvent :: TuiState -> Tab -> Focus -> Event -> NewState
@@ -225,6 +238,9 @@ handleEvent s SubmissionTab ListFocus e = do
 handleEvent s SubmissionTab DetailFocus (EvKey (KChar '1') []) = continue s {tuiStateTab = DownloadTab}
 handleEvent s SubmissionTab DetailFocus (EvKey (KChar 'h') []) = do
   newState <- handleFocusSubmission s
+  continue newState
+handleEvent s SubmissionTab DetailFocus (EvKey KEnter []) = do
+  newState <- handleSubmissionReport s
   continue newState
 handleEvent s SubmissionTab DetailFocus e = do
   newState <- handleSubmissionDetail s e

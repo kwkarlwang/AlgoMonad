@@ -209,8 +209,8 @@ extractReport value = statusCodeToReport statusCode value
     statusCodeToReport 20 = extractCompileError
     statusCodeToReport _ = extractUnknown
 
-getSubmissionReports :: FilePath -> String -> Integer -> IO SubmissionReport
-getSubmissionReports path slug pid = do
+getSubmissionReport :: FilePath -> String -> Integer -> IO SubmissionReport
+getSubmissionReport path slug pid = do
   submitProblem <- readProblemFromFile path slug pid
   reqSubmission <- requestSubmission submitProblem
   r <- runReq defaultHttpConfig reqSubmission

@@ -41,7 +41,7 @@ library
       Frontend.State
       Frontend.Submission
       Frontend.SubmissionDetail
-      Frontend.SubmissonReport
+      Frontend.SubmissionReport
       Frontend.Tab
       Frontend.UserInfo
       Frontend.Utils

@@ -9,6 +9,7 @@ import qualified Frontend.ProblemDetail as PD
 import Frontend.State
 import qualified Frontend.Submission as S
 import qualified Frontend.SubmissionDetail as SD
+import qualified Frontend.SubmissionReport as SR
 import qualified Frontend.Tab as Tab
 import qualified Frontend.UserInfo as UI
 import Frontend.Utils
@@ -51,12 +52,18 @@ drawSubmission ts =
     tabWidget = Tab.renderTab (tuiStateTab ts)
     topWidget = tabWidget <+> userInfoWidget
     -- middle
-    submissionListWidget = hLimitPercent 70 $ S.renderSubmission (currentFocus == ListFocus) $ tuiStateSubmissionList ts
+    -- left
+    submissionListWidget = vLimitPercent 50 $ S.renderSubmission (currentFocus == ListFocus) $ tuiStateSubmissionList ts
+    submissionReportWidget = case tuiStateSubmissionReport ts of
+      Nothing -> str ""
+      Just submissionReport -> SR.renderSubmissionReport submissionReport
+    leftSide = hLimitPercent 70 $ submissionListWidget <=> hBorder <=> submissionReportWidget
+    -- right
     submissionDetailWidget = padBottom Max $ case tuiStateSubmissionDetail ts of
       Nothing -> str " "
       Just submissionDetail -> SD.renderSubmission (currentFocus == DetailFocus) submissionDetail
     rightSide = submissionDetailWidget <=> renderHelp
-    submissionWidget = hBox [submissionListWidget, vBorder, rightSide]
+    submissionWidget = hBox [leftSide, vBorder, rightSide]
     -- bottom
     bottomWidget = case tuiStateMessage ts of
       Nothing -> E.renderEditor (str . unlines) (currentFocus == SearchFocus) (tuiStateSubmissionSearch ts)
