@@ -24,7 +24,7 @@ import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.List as BL hiding (reverse)
 import Data.List (intercalate)
 import Data.Vector as V hiding ((++))
-import Frontend.State (NewState, ResourceName (ProblemView), TuiState (TuiState))
+import Frontend.State (NewState, ResourceName, TuiState (TuiState))
 import Frontend.Utils (drawGreen, drawRed, drawStr, drawYellow, floatDiv, floatRound)
 
 renderProblem :: Bool -> BL.List ResourceName Problem -> Widget ResourceName

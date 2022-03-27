@@ -28,6 +28,8 @@ library
       Backend.Cookie
       Backend.Problem
       Backend.ProblemDetail
+      Backend.Submission
+      Backend.SubmissionDetail
       Backend.UserInfo
       Backend.Utils
       Frontend.App
@@ -35,7 +37,12 @@ library
       Frontend.KeyBinding
       Frontend.Problem
       Frontend.ProblemDetail
+      Frontend.Render
       Frontend.State
+      Frontend.Submission
+      Frontend.SubmissionDetail
+      Frontend.SubmissionReport
+      Frontend.Tab
       Frontend.UserInfo
       Frontend.Utils
   other-modules:
@@ -55,6 +62,7 @@ library
     , lens-aeson ==1.1.2
     , process ==1.6.13.2
     , req ==3.9.2
+    , scientific ==0.3.3.8
     , sqlite-simple ==0.4.18.0
     , text ==1.2.4.1
     , utf8-string ==1.0.2
@@ -85,6 +93,7 @@ executable algomonad
     , lens-aeson ==1.1.2
     , process ==1.6.13.2
     , req ==3.9.2
+    , scientific ==0.3.3.8
     , sqlite-simple ==0.4.18.0
     , text ==1.2.4.1
     , utf8-string ==1.0.2
@@ -119,6 +128,7 @@ test-suite AlgoMonad-test
     , lens-aeson ==1.1.2
     , process ==1.6.13.2
     , req ==3.9.2
+    , scientific ==0.3.3.8
     , sqlite-simple ==0.4.18.0
     , text ==1.2.4.1
     , utf8-string ==1.0.2

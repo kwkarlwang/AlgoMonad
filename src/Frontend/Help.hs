@@ -11,6 +11,7 @@ help =
   [ ("Pro tip", "select language with SHIFT+"),
     ("", "prefix of the language"),
     (" ", " "),
+    ("1/2", "switch tab"),
     ("h", "go back"),
     ("j", "move down"),
     ("k", "move up"),

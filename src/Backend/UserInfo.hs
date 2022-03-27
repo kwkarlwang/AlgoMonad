@@ -12,8 +12,7 @@ import Network.HTTP.Req
 type UserInfo = [(String, String)]
 
 requestUserInfo :: (FromJSON a) => IO (Req (JsonResponse a))
-requestUserInfo = do
-  req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse <$> getCredentials
+requestUserInfo = req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse <$> getCredentials
   where
     payload =
       object
