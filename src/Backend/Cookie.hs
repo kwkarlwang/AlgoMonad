@@ -1,5 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS -Wunused-imports #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use fromMaybe" #-}
 
 module Backend.Cookie where
 
@@ -28,10 +31,11 @@ chromeMacPath = do
   homePath <- getHomeDirectory
   return $ homePath ++ "/Library/ApplicationSupport/Google/Chrome/Default/Cookies"
 
-getChromeCookie :: IO ()
-getChromeCookie = do
+getChromeCookie :: String -> IO ()
+getChromeCookie cookiePath = do
   let sql = "select name, encrypted_value from cookies where host_key like \"%leetcode.com\""
-  path <- chromeMacPath
+  let path = cookiePath
+
   conn <- open path
   result <- query_ conn sql :: IO [(String, B.ByteString)]
   close conn
