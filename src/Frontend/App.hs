@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS -Wunused-imports #-}
 
 module Frontend.App where
 
 import qualified Backend.Problem as P
 import qualified Backend.Submission as S
-import Backend.UserInfo (UserInfo, getUserInfo, requestUserInfo)
+import Backend.UserInfo (getUserInfo)
 import Brick
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
-import Control.Monad.IO.Class (MonadIO (liftIO))
 import qualified Data.Vector as V
 import Frontend.KeyBinding (handleTuiEvent)
 import Frontend.Render (drawTui)

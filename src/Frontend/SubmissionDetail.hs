@@ -1,9 +1,9 @@
+{-# OPTIONS -Wunused-imports #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Frontend.SubmissionDetail where
 
-import Backend.Submission (Submission (slug), pid)
-import Brick (Widget, padLeftRight)
+import Brick (Widget)
 import Brick.Widgets.List as BL hiding (reverse)
 import qualified Data.Text as T
 import Frontend.State (ResourceName)

@@ -1,30 +1,21 @@
+{-# OPTIONS -Wunused-imports #-}
 module Frontend.Problem where
 
 import Backend.Problem
   ( Difficulty (Easy, Hard, Medium),
-    Problem (Problem, difficulty, paidOnly, pid, status, title, totalAccept, totalSubmit),
-    Status (Cleared, NotAttempted, NotCleared),
+    Status (Cleared, NotAttempted, NotCleared), Problem (status, difficulty, pid, title, totalAccept, totalSubmit)
   )
 import Brick
   ( Padding (Max, Pad),
     TextWidth (textWidth),
-    ViewportType (Vertical),
     Widget,
-    continue,
     hBox,
-    padLeft,
     padLeftRight,
     padRight,
-    str,
-    vBox,
-    viewport,
-    visible,
   )
-import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.List as BL hiding (reverse)
-import Data.List (intercalate)
 import Data.Vector as V hiding ((++))
-import Frontend.State (NewState, ResourceName, TuiState (TuiState))
+import Frontend.State (ResourceName)
 import Frontend.Utils (drawGreen, drawRed, drawStr, drawYellow, floatDiv, floatRound)
 
 renderProblem :: Bool -> BL.List ResourceName Problem -> Widget ResourceName

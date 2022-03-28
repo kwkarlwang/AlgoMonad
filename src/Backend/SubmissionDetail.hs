@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS -Wunused-imports #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Backend.SubmissionDetail where
@@ -9,7 +10,6 @@ import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
 import qualified Data.ByteString.UTF8 as BSU
-import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import Network.HTTP.Req
 

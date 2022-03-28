@@ -1,14 +1,12 @@
+{-# OPTIONS -Wunused-imports #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Frontend.Utils where
 
-import Brick (Widget (Widget), str, withAttr)
+import Brick (Widget, str, withAttr)
 import Brick.Util (fg, on)
 import Brick.Widgets.Border (borderAttr)
-import Brick.Widgets.List (list)
 import qualified Data.Function as F (on)
-import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NE
 import Graphics.Vty.Attributes
 
 colorMap =

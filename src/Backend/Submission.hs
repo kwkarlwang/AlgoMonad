@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS -Wunused-imports #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Backend.Submission where

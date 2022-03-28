@@ -1,17 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{-# OPTIONS -Wunused-imports #-}
+
 module Backend.Utils where
 
 import Backend.Cookie (getConfigFromFile)
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
-import Data.ByteString (ByteString)
-import qualified Data.Map as M
 import Data.Scientific (toRealFloat)
 import qualified Data.Text as T
 import Network.HTTP.Req
-import System.Directory (getHomeDirectory)
 
 langExtensionPair =
   [ ("c", ".c"),

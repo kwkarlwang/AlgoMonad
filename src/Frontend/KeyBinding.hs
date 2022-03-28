@@ -1,3 +1,4 @@
+{-# OPTIONS -Wunused-imports #-}
 module Frontend.KeyBinding where
 
 import qualified Backend.Problem as P
@@ -8,7 +9,6 @@ import Brick
   ( BrickEvent (VtyEvent),
     EventM,
     continue,
-    hBox,
     halt,
   )
 import qualified Brick.Widgets.Edit as E
@@ -16,7 +16,6 @@ import qualified Brick.Widgets.List as BL
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Char (isDigit, isUpper, toLower)
 import Data.List (isInfixOf)
-import Debug.Trace (traceM)
 import Frontend.Problem (showTitle)
 import Frontend.State
 import Graphics.Vty.Input.Events

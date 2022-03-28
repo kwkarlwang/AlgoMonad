@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS -Wunused-imports #-}
 
 module Backend.Problem where
 
 import Backend.Utils
 import Control.Lens hiding ((.=))
-import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Aeson
 import Data.Aeson.Lens
 import Data.Ord (comparing)

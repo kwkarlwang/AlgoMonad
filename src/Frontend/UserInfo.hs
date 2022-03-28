@@ -1,9 +1,10 @@
+{-# OPTIONS -Wunused-imports #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Frontend.UserInfo where
 
 import Backend.UserInfo (UserInfo)
-import Brick (Widget (Widget), hBox, str)
+import Brick (Widget, hBox)
 import Brick.Widgets.Center (hCenter)
 import Frontend.State (ResourceName)
 import Frontend.Utils (drawGreen, drawStr)

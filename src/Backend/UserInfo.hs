@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{-# OPTIONS -Wunused-imports #-}
+
 module Backend.UserInfo where
 
 import Backend.Utils

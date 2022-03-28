@@ -1,14 +1,13 @@
+{-# OPTIONS -Wunused-imports #-}
 module Frontend.State where
 
-import Backend.Problem (Difficulty, Problem (Problem), Status)
-import Backend.ProblemDetail (ProblemDetail (ProblemDetail))
+import Backend.Problem (Problem)
 import Backend.Submission (Submission)
 import Backend.SubmissionDetail (SubmissionReport)
 import Backend.UserInfo (UserInfo)
-import Brick (App (..), BrickEvent (VtyEvent), EventM, Next)
+import Brick (EventM, Next)
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
-import qualified Data.Vector as V
 
 data Focus
   = ListFocus

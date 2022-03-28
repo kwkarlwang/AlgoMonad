@@ -1,3 +1,4 @@
+{-# OPTIONS -Wunused-imports #-}
 module Frontend.Render where
 
 import Brick

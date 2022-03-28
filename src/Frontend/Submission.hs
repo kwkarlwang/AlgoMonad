@@ -1,7 +1,8 @@
+{-# OPTIONS -Wunused-imports #-}
 module Frontend.Submission where
 
 import Backend.Submission (Submission (slug), pid)
-import Brick (Widget, padLeftRight)
+import Brick (Widget)
 import Brick.Widgets.List as BL hiding (reverse)
 import Frontend.State (ResourceName)
 import Frontend.Utils (drawStr)

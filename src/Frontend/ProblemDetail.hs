@@ -1,12 +1,10 @@
+{-# OPTIONS -Wunused-imports #-}
 module Frontend.ProblemDetail where
 
-import Brick (Padding (Pad), TextWidth (textWidth), ViewportType (Vertical), Widget, continue, hBox, padLeftRight, padRight, str, vBox, viewport, visible)
-import Brick.Widgets.Center (hCenter)
+import Brick (Widget)
 import Brick.Widgets.List as BL hiding (reverse)
-import Data.List (intercalate)
-import Data.Vector as V hiding ((++))
-import Frontend.State (ProblemDetailList (ProblemDetailList, codeDefinitionList), ResourceName)
-import Frontend.Utils (drawStr, floatDiv, floatRound)
+import Frontend.State (ProblemDetailList (codeDefinitionList), ResourceName)
+import Frontend.Utils (drawStr)
 
 renderProblemDetail :: Bool -> ProblemDetailList -> Widget ResourceName
 renderProblemDetail hasFocus problemDetail = BL.renderList renderFunc hasFocus codeList

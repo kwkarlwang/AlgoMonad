@@ -1,14 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS -Wunused-imports #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Backend.ProblemDetail where
 
 import Backend.Utils
-import qualified Brick.Widgets.List as BL
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
-import Data.Aeson.Text (encodeToLazyText)
 import Data.List (intercalate)
 import qualified Data.Text as T (Text, unpack)
 import qualified Data.Text.Lazy as TL (fromStrict)

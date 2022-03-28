@@ -1,3 +1,4 @@
+{-# OPTIONS -Wunused-imports #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 

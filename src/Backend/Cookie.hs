@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS -Wunused-imports #-}
 
 module Backend.Cookie where
 
-import Control.Applicative
 import Control.Lens ((^?))
-import Control.Monad.IO.Class (MonadIO (liftIO))
 import Crypto.Cipher.AES (AES128)
 import Crypto.Cipher.Types (BlockCipher (..), Cipher (..), IV, makeIV)
 import Crypto.Error (CryptoFailable (..))
@@ -14,8 +13,6 @@ import Data.Aeson.Lens (key)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.UTF8 as BU
 import qualified Data.Text as T
-import qualified Data.Vector as V
-import Data.Yaml (decodeFile)
 import qualified Data.Yaml as Yaml
 import Database.SQLite.Simple
 import System.Directory (doesFileExist, getHomeDirectory)

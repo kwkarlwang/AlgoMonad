@@ -1,7 +1,7 @@
+{-# OPTIONS -Wunused-imports #-}
 module Frontend.Tab where
 
-import Brick (Widget, hBox, hLimitPercent, setAvailableSize)
-import Brick.Widgets.Center (hCenter, hCenterWith)
+import Brick (Widget, hBox, hLimitPercent)
 import Frontend.State (ResourceName, Tab (DownloadTab, SubmissionTab))
 import Frontend.Utils (drawStr, drawTab)
 
