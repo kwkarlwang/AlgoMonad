@@ -97,7 +97,7 @@ Here is a list of essential libraries needed for this program
 - [x] Acquire user token automatically through browser cookies.
 - [x] Browse LeetCode questions.
 - [x] Download and write LeetCode questions to local files.
-- [ ] Submit local files to LeetCode and evaluate result.
+- [x] Submit local files to LeetCode and evaluate result.
 
 ## Inspirations
 
