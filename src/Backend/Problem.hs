@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 {-# OPTIONS -Wunused-imports #-}
 
 module Backend.Problem where
@@ -23,6 +24,7 @@ data Difficulty = Easy | Medium | Hard deriving (Eq, Show)
 
 data Problem = Problem
   { pid :: Integer,
+    submitPid :: Integer,
     title :: String,
     difficulty :: Difficulty,
     paidOnly :: Bool,
@@ -36,9 +38,10 @@ data Problem = Problem
 requestProblems :: (FromJSON a) => IO (Req (JsonResponse a))
 requestProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse <$> getCredentials
 
-getProblem :: Value -> Maybe Problem
-getProblem value = do
+extractProblem :: Value -> Maybe Problem
+extractProblem value = do
   pid <- value ^? key "stat" . key "frontend_question_id"
+  submitPid <- value ^? key "stat" . key "question_id"
   title <- value ^? key "stat" . key "question__title"
   difficulty <- value ^? key "difficulty" . key "level"
   paidOnly <- value ^? key "paid_only"
@@ -46,8 +49,9 @@ getProblem value = do
   totalSubmit <- value ^? key "stat" . key "total_submitted"
   let status = value ^? key "status"
   slug <- value ^? key "stat" . key "question__title_slug"
-  case (pid, title, difficulty, paidOnly, totalAccept, totalSubmit, status, slug) of
+  case (pid, submitPid, title, difficulty, paidOnly, totalAccept, totalSubmit, status, slug) of
     ( Integer pid,
+      Integer submitPid,
       String title,
       Integer difficulty,
       Bool paidOnly,
@@ -56,7 +60,7 @@ getProblem value = do
       status,
       String slug
       ) ->
-        return $ Problem pid (init . tail $ show title) diff paidOnly totalAccept totalSubmit stat (init . tail $ show slug)
+        return $ Problem pid submitPid (init . tail $ show title) diff paidOnly totalAccept totalSubmit stat (init . tail $ show slug)
         where
           diff = case difficulty of
             1 -> Easy
@@ -80,7 +84,7 @@ getProblems = do
       let problems = reqData ^? key "stat_status_pairs"
        in case problems of
             Just (Array array) -> do
-              case V.mapM getProblem array of
+              case V.mapM extractProblem array of
                 Just problems -> V.modify (sortBy (comparing pid)) problems
                 Nothing -> V.empty
             _ -> V.empty

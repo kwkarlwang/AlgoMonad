@@ -81,6 +81,6 @@ writeProblemToFile slug content codeDefinitionPair pid = do
   let (codeLang, codeText) = codeDefinitionPair
   let codeFileExtension = langToExtension codeLang
   DIR.createDirectoryIfMissing True folderPath
-  writeFile (folderPath ++ "/" ++ "writeup.html") contentText
+  writeFile (folderPath ++ "/" ++ "writeup.html") $ darkModeCss ++ contentText
   writeFile (folderPath ++ "/" ++ codeLang ++ codeFileExtension) codeText
   return ()

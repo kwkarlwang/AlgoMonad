@@ -16,6 +16,7 @@ import qualified Brick.Widgets.List as BL
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Char (isDigit, isUpper, toLower)
 import Data.List (isInfixOf)
+import qualified Data.Vector as V
 import Frontend.Problem (showTitle)
 import Frontend.State
 import Graphics.Vty.Input.Events
@@ -131,9 +132,12 @@ handleSubmissionReport :: TuiState -> EventM ResourceName TuiState
 handleSubmissionReport s = do
   let submissionDetail = BL.listSelectedElement <$> tuiStateSubmissionDetail s
   let submission = BL.listSelectedElement $ tuiStateSubmissionList s
+
   case (submission, submissionDetail) of
     (Just (_, submission), Just (Just (_, filepath))) -> do
-      submissionReport <- liftIO $ SD.getSubmissionReport filepath (S.slug submission) (S.pid submission)
+      let problemList = BL.listElements $ tuiStateProblemList s
+      let problem = V.head $ V.filter (\problem -> P.pid problem == S.pid submission) problemList
+      submissionReport <- liftIO $ SD.getSubmissionReport filepath (S.slug submission) (S.pid submission) (P.submitPid problem)
       return $ s {tuiStateSubmissionReport = Just submissionReport}
     _ -> return s
 

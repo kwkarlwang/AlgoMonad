@@ -17,7 +17,8 @@ data SubmissionDetail = SubmissionDetail
   { submissionLang :: String,
     submissionSlug :: String,
     content :: String,
-    pid :: Integer
+    pid :: Integer,
+    submitPid :: Integer
   }
   deriving (Show)
 
@@ -90,7 +91,7 @@ requestSubmission problem = req POST url (ReqBodyJson payload) jsonResponse <$> 
           "lang" .= submissionLang problem,
           "typed_code" .= content problem,
           "test_mode" .= False,
-          "question_id" .= pid problem
+          "question_id" .= submitPid problem
         ]
 
 requestVerification :: (FromJSON a) => Integer -> IO (Req (JsonResponse a))
@@ -98,8 +99,8 @@ requestVerification submissionId = req GET url NoReqBody jsonResponse <$> getCre
   where
     url = https "leetcode.com" /: "submissions" /: "detail" /: T.pack (show submissionId) /: "check"
 
-readProblemFromFile :: FilePath -> String -> Integer -> IO SubmissionDetail
-readProblemFromFile path slug pid = do
+readProblemFromFile :: FilePath -> String -> Integer -> Integer -> IO SubmissionDetail
+readProblemFromFile path slug pid submitPid = do
   content <- readFile path
   let submissionLang = T.unpack . head . T.splitOn "." . last . T.splitOn "/" . T.pack $ path
   let submissionSlug = slug
@@ -209,9 +210,9 @@ extractReport value = statusCodeToReport statusCode value
     statusCodeToReport 20 = extractCompileError
     statusCodeToReport _ = extractUnknown
 
-getSubmissionReport :: FilePath -> String -> Integer -> IO SubmissionReport
-getSubmissionReport path slug pid = do
-  submitProblem <- readProblemFromFile path slug pid
+getSubmissionReport :: FilePath -> String -> Integer -> Integer -> IO SubmissionReport
+getSubmissionReport path slug pid submitPid = do
+  submitProblem <- readProblemFromFile path slug pid submitPid
   reqSubmission <- requestSubmission submitProblem
   r <- runReq defaultHttpConfig reqSubmission
   let reqData = responseBody r :: Value

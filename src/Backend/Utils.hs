@@ -65,3 +65,5 @@ unpackInteger val = case val of
 unpackFloat val = case val of
   Just (Number val) -> toRealFloat val
   _ -> 0
+
+darkModeCss = "<style> body { background: #282a36; color: white; }</style>\n"
