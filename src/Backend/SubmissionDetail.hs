@@ -131,8 +131,8 @@ extractAccepted value slug = output
     statusMessage = unpackString $ value ^? key "status_msg"
     statusRuntime = unpackString $ value ^? key "status_runtime"
     statusMemory = unpackString $ value ^? key "status_memory"
-    runtimePercentile = unpackFloat $ value ^? key "runtimePercentile"
-    memoryPercentile = unpackFloat $ value ^? key "memoryPercentile"
+    runtimePercentile = unpackFloat $ value ^? key "runtime_percentile"
+    memoryPercentile = unpackFloat $ value ^? key "memory_percentile"
     output = Accepted {..}
 
 extractWrongAnswer :: Value -> String -> SubmissionReport
