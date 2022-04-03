@@ -11,7 +11,7 @@ import Graphics.Vty.Attributes
 
 colorMap =
   [ ("white", fg brightWhite),
-    ("bold" <> "white", fg brightWhite),
+    ("bold" <> "white", withStyle (fg brightWhite) bold),
     ("selected" <> "black", withStyle (black `on` magenta) bold),
     ("red", fg red),
     ("selected" <> "red", withStyle (black `on` magenta) bold),

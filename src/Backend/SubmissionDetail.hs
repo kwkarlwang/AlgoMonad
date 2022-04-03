@@ -106,8 +106,6 @@ readProblemFromFile path slug pid submitPid = do
   let submissionSlug = slug
   return SubmissionDetail {..}
 
--- extractProblemReport
-
 getVerfication :: Integer -> Integer -> IO Value
 getVerfication submissionId count = do
   reqVerification <- requestVerification submissionId
