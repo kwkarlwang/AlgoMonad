@@ -67,3 +67,6 @@ unpackFloat val = case val of
   _ -> 0
 
 darkModeCss = "<style> body { background: #282a36; color: white; }</style>\n"
+
+getProblemAddress :: String -> String
+getProblemAddress slug = "https://leetcode.com/problems/" ++ slug
