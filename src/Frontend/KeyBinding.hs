@@ -5,6 +5,7 @@ import qualified Backend.Problem as P
 import qualified Backend.ProblemDetail as PD
 import qualified Backend.Submission as S
 import qualified Backend.SubmissionDetail as SD
+import Backend.Utils (getProblemAddress)
 import Brick
   ( BrickEvent (VtyEvent),
     EventM,
@@ -20,6 +21,7 @@ import qualified Data.Vector as V
 import Frontend.Problem (showTitle)
 import Frontend.State
 import Graphics.Vty.Input.Events
+import Web.Browser (openBrowser)
 
 emptyEditor = E.editor DownloadSearchView (Just 1) ""
 
@@ -138,8 +140,30 @@ handleSubmissionReport s = do
       let problemList = BL.listElements $ tuiStateProblemList s
       let problem = V.head $ V.filter (\problem -> P.pid problem == S.pid submission) problemList
       submissionReport <- liftIO $ SD.getSubmissionReport filepath (S.slug submission) (S.pid submission) (P.submitPid problem)
-      return $ s {tuiStateSubmissionReport = Just submissionReport}
+      return s {tuiStateSubmissionReport = Just submissionReport}
     _ -> return s
+
+handleOpenProblemInDownload :: TuiState -> EventM ResourceName TuiState
+handleOpenProblemInDownload s = do
+  let currentProblemPair = BL.listSelectedElement $ tuiStateProblemList s
+  case currentProblemPair of
+    Nothing -> return s
+    Just (_, currentProblem) -> do
+      success <- liftIO $ openBrowser $ getProblemAddress $ P.slug currentProblem
+      if success
+        then return s {tuiStateMessage = Just "Open website successful!"}
+        else return s {tuiStateMessage = Just "Open website failed!"}
+
+handleOpenProblemInSubmission :: TuiState -> EventM ResourceName TuiState
+handleOpenProblemInSubmission s = do
+  let currentProblemPair = BL.listSelectedElement $ tuiStateSubmissionList s
+  case currentProblemPair of
+    Nothing -> return s
+    Just (_, currentProblem) -> do
+      success <- liftIO $ openBrowser $ getProblemAddress $ S.slug currentProblem
+      if success
+        then return s {tuiStateMessage = Just "Open website successful!"}
+        else return s {tuiStateMessage = Just "Open website failed!"}
 
 handleEvent :: TuiState -> Tab -> Focus -> Event -> NewState
 -- Download
@@ -154,6 +178,7 @@ handleEvent s DownloadTab ListFocus e@(EvKey (KChar '/') []) = do
 handleEvent s DownloadTab ListFocus e@(EvKey (KChar '=') []) = do
   newState <- handleSearch s e
   continue newState
+-- Search next occurance
 handleEvent s DownloadTab ListFocus e@(EvKey (KChar 'n') []) = do
   let search = tuiStateDownloadSearch s
   let problemList = tuiStateProblemList s
@@ -167,6 +192,11 @@ handleEvent s DownloadTab ListFocus e@(EvKey (KChar 'n') []) = do
           content `isInfixOf` map toLower (showTitle p)
   let newProblemList = BL.listFindBy filterCondition problemList
   continue s {tuiStateProblemList = newProblemList}
+
+-- Open question in browser
+handleEvent s DownloadTab ListFocus (EvKey (KChar 'o') []) = do
+  newState <- handleOpenProblemInDownload s
+  continue newState
 handleEvent s DownloadTab ListFocus (EvKey (KChar '2') []) = continue s {tuiStateTab = SubmissionTab}
 handleEvent s DownloadTab ListFocus e = do
   newState <- handleProblemList s e
@@ -188,6 +218,9 @@ handleEvent s DownloadTab DetailFocus (EvKey KEnter []) = do
           liftIO $ PD.writeProblemToFile (slug problemDetail) (content problemDetail) currentCodePair (pid problemDetail)
           continue s {tuiStateMessage = Just "Download successful!"}
 handleEvent s DownloadTab DetailFocus (EvKey (KChar '2') []) = continue s {tuiStateTab = SubmissionTab}
+handleEvent s DownloadTab DetailFocus (EvKey (KChar 'o') []) = do
+  newState <- handleOpenProblemInDownload s
+  continue newState
 handleEvent s DownloadTab DetailFocus e = do
   newState <- handleProblemDetail s e
   continue newState
@@ -222,7 +255,6 @@ handleEvent s DownloadTab SearchFocus e@(EvKey (KChar char) _) = do
     ('=', True) -> E.handleEditorEvent e oldSearch
     ('/', _) -> E.handleEditorEvent e oldSearch
     (_, _) -> return oldSearch
-
   continue s {tuiStateDownloadSearch = newSearch}
 handleEvent s DownloadTab SearchFocus e = do
   let oldSearch = tuiStateDownloadSearch s
@@ -230,21 +262,29 @@ handleEvent s DownloadTab SearchFocus e = do
   continue s {tuiStateDownloadSearch = newSearch}
 -- Submission
 -- List
-handleEvent s SubmissionTab ListFocus (EvKey (KChar '1') []) = continue s {tuiStateTab = DownloadTab}
 handleEvent s SubmissionTab ListFocus (EvKey (KChar 'l') []) = do
   newState <- handleFocusSubmissionDetail s
   continue newState
+handleEvent s SubmissionTab ListFocus (EvKey (KChar 'o') []) = do
+  newState <- handleOpenProblemInSubmission s
+  continue newState
+handleEvent s SubmissionTab ListFocus (EvKey (KChar '1') []) = continue s {tuiStateTab = DownloadTab}
 handleEvent s SubmissionTab ListFocus e = do
   newState <- handleSubmissionList s e
   continue newState
 -- Detail
-handleEvent s SubmissionTab DetailFocus (EvKey (KChar '1') []) = continue s {tuiStateTab = DownloadTab}
 handleEvent s SubmissionTab DetailFocus (EvKey (KChar 'h') []) = do
   newState <- handleFocusSubmission s
   continue newState
 handleEvent s SubmissionTab DetailFocus (EvKey KEnter []) = do
   newState <- handleSubmissionReport s
   continue newState
+
+-- Open question in browser
+handleEvent s SubmissionTab DetailFocus (EvKey (KChar 'o') []) = do
+  newState <- handleOpenProblemInSubmission s
+  continue newState
+handleEvent s SubmissionTab DetailFocus (EvKey (KChar '1') []) = continue s {tuiStateTab = DownloadTab}
 handleEvent s SubmissionTab DetailFocus e = do
   newState <- handleSubmissionDetail s e
   continue newState
