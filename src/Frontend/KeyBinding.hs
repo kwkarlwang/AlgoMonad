@@ -167,7 +167,9 @@ handleEvent s DownloadTab ListFocus e@(EvKey (KChar 'n') []) = do
           content `isInfixOf` map toLower (showTitle p)
   let newProblemList = BL.listFindBy filterCondition problemList
   continue s {tuiStateProblemList = newProblemList}
-handleEvent s DownloadTab ListFocus (EvKey (KChar '2') []) = continue s {tuiStateTab = SubmissionTab}
+handleEvent s DownloadTab ListFocus (EvKey (KChar '2') []) = do
+  submissions <- liftIO S.getSubmissions
+  continue s {tuiStateTab = SubmissionTab, tuiStateSubmissionList = BL.list SubmissionListView submissions 1}
 handleEvent s DownloadTab ListFocus e = do
   newState <- handleProblemList s e
   continue newState
@@ -234,6 +236,9 @@ handleEvent s SubmissionTab ListFocus (EvKey (KChar '1') []) = continue s {tuiSt
 handleEvent s SubmissionTab ListFocus (EvKey (KChar 'l') []) = do
   newState <- handleFocusSubmissionDetail s
   continue newState
+handleEvent s SubmissionTab ListFocus (EvKey (KChar 'r') []) = do
+  submissions <- liftIO S.getSubmissions
+  continue s {tuiStateSubmissionList = BL.list SubmissionListView submissions 1}
 handleEvent s SubmissionTab ListFocus e = do
   newState <- handleSubmissionList s e
   continue newState

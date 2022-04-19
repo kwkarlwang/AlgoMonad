@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 {-# OPTIONS -Wunused-imports #-}
 
 module Frontend.App where
 
 import qualified Backend.Problem as P
-import qualified Backend.Submission as S
 import Backend.UserInfo (getUserInfo)
 import Brick
 import qualified Brick.Widgets.Edit as E
@@ -36,7 +36,7 @@ buildInitialState =
   do
     userInfo <- getUserInfo
     problems <- P.getProblems
-    submissions <- S.getSubmissions
+    let submissions = V.empty
     let isCurrentUserPremium = snd $ head $ filter (\tup -> fst tup == "premium") userInfo
     let filterProblems = case isCurrentUserPremium of
           "False" -> V.filter (not . P.paidOnly) problems
