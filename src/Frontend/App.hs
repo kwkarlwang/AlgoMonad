@@ -44,7 +44,7 @@ buildInitialState =
     return $
       TuiState
         { tuiStateUserInfo = userInfo,
-          tuiStateProblemList = BL.list DownloadListView problems 1,
+          tuiStateProblemList = BL.list DownloadListView filterProblems 1,
           tuiStateDownloadFocus = ListFocus,
           tuiStateProblemDetail = Nothing,
           tuiStateDownloadSearch = E.editor DownloadSearchView (Just 1) "",
