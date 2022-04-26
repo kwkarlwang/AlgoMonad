@@ -194,7 +194,17 @@ handleEvent s DownloadTab ListFocus e@(EvKey (KChar 'n') []) = do
   continue s {tuiStateProblemList = newProblemList}
 handleEvent s DownloadTab ListFocus (EvKey (KChar '2') []) = do
   submissions <- liftIO S.getSubmissions
-  continue s {tuiStateTab = SubmissionTab, tuiStateSubmissionList = BL.list SubmissionListView submissions 1}
+  let oldList = tuiStateSubmissionList s
+  let newList = BL.list SubmissionListView submissions 1
+  let idx = BL.listSelected oldList
+  continue
+    s
+      { tuiStateTab = SubmissionTab,
+        tuiStateSubmissionList =
+          case idx of
+            Just idx -> BL.listMoveTo idx newList
+            Nothing -> newList
+      }
 
 -- Open question in browser
 handleEvent s DownloadTab ListFocus (EvKey (KChar 'o') []) = do
@@ -269,7 +279,16 @@ handleEvent s SubmissionTab ListFocus (EvKey (KChar 'l') []) = do
   continue newState
 handleEvent s SubmissionTab ListFocus (EvKey (KChar 'r') []) = do
   submissions <- liftIO S.getSubmissions
-  continue s {tuiStateSubmissionList = BL.list SubmissionListView submissions 1}
+  let oldList = tuiStateSubmissionList s
+  let newList = BL.list SubmissionListView submissions 1
+  let idx = BL.listSelected oldList
+  continue
+    s
+      { tuiStateSubmissionList =
+          case idx of
+            Just idx -> BL.listMoveTo idx newList
+            Nothing -> newList
+      }
 handleEvent s SubmissionTab ListFocus (EvKey (KChar 'o') []) = do
   newState <- handleOpenProblemInSubmission s
   continue newState
