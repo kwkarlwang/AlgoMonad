@@ -29,14 +29,15 @@ renderSubmissionReport RuntimeError {..} = widget
   where
     slugWidget = renderSlug slug
     statusWidget = renderStatus False statusMessage
+    runtimeErrorWidget = renderError runtimeError
     testcasesWidget = renderTestcases totalCorrect totalTestcases
     lastTestcaseWidget = renderLastTestcaseError lastTestcase actualOutput expectedOutput stdOutput
-    widget = vBox [slugWidget, statusWidget, testcasesWidget, lastTestcaseWidget]
+    widget = vBox [slugWidget, statusWidget, runtimeErrorWidget, testcasesWidget, lastTestcaseWidget]
 renderSubmissionReport CompileError {..} = widget
   where
     slugWidget = renderSlug slug
     statusWidget = renderStatus False statusMessage
-    compileErrorWidget = renderCompileError compileError
+    compileErrorWidget = renderError compileError
     widget = vBox [slugWidget, statusWidget, compileErrorWidget]
 renderSubmissionReport LimitExceed {..} = widget
   where
@@ -133,8 +134,8 @@ renderLastTestcaseLimit lastTestcase stdOutput = widget
       (Just stdOutputWidget) -> vBox [titleWidget, inputWidget, stdOutputWidget]
       Nothing -> vBox [titleWidget, inputWidget]
 
-renderCompileError :: String -> Widget ResourceName
-renderCompileError compileError = widget
+renderError :: String -> Widget ResourceName
+renderError errorMessage = widget
   where
-    f = drawStr False
-    widget = f compileError
+    f = drawRed False
+    widget = f errorMessage
