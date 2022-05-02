@@ -12,8 +12,8 @@ import qualified Frontend.Submission as S
 import qualified Frontend.SubmissionDetail as SD
 import qualified Frontend.SubmissionReport as SR
 import qualified Frontend.Tab as Tab
-import qualified Frontend.UserInfo as UI
 import Frontend.Utils
+import qualified UserInfo.Render as UI
 
 drawTui :: TuiState -> [Widget ResourceName]
 drawTui ts = case tuiStateTab ts of

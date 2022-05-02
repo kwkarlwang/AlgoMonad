@@ -30,7 +30,6 @@ library
       Backend.ProblemDetail
       Backend.Submission
       Backend.SubmissionDetail
-      Backend.UserInfo
       Backend.Utils
       Frontend.App
       Frontend.Help
@@ -43,8 +42,10 @@ library
       Frontend.SubmissionDetail
       Frontend.SubmissionReport
       Frontend.Tab
-      Frontend.UserInfo
       Frontend.Utils
+      UserInfo.Render
+      UserInfo.Request
+      UserInfo.State
   other-modules:
       Paths_AlgoMonad
   hs-source-dirs:

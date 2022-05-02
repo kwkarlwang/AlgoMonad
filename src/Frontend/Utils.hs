@@ -18,11 +18,14 @@ colorMap =
     ("bold" <> "red", withStyle (fg red) bold),
     ("yellow", fg yellow),
     ("selected" <> "yellow", withStyle (black `on` magenta) bold),
+    ("bold" <> "yellow", withStyle (fg yellow) bold),
     ("green", fg green),
     ("selected" <> "green", withStyle (black `on` magenta) bold),
     ("bold" <> "green", withStyle (fg green) bold),
     ("tab", black `on` brightBlack),
     ("selected" <> "tab", withStyle (black `on` brightWhite) bold),
+    ("cyan", fg cyan),
+    ("selected" <> "cyan", withStyle (black `on` cyan) bold),
     ("bold" <> "cyan", withStyle (fg cyan) bold),
     (borderAttr, fg brightWhite)
   ]
@@ -48,8 +51,14 @@ drawBoldGreen = withAttr ("bold" <> "green") . str
 drawYellow :: Bool -> String -> Widget n
 drawYellow b = (if b then withAttr ("selected" <> "yellow") else withAttr "yellow") . str
 
+drawBoldYellow :: String -> Widget n
+drawBoldYellow = withAttr ("bold" <> "yellow") . str
+
 drawTab :: Bool -> String -> Widget n
 drawTab b = (if b then withAttr ("selected" <> "tab") else withAttr "tab") . str
+
+drawCyan :: Bool -> String -> Widget n
+drawCyan b = (if b then withAttr ("selected" <> "cyan") else withAttr "cyan") . str
 
 drawBoldCyan :: String -> Widget n
 drawBoldCyan = withAttr ("bold" <> "cyan") . str
