@@ -8,6 +8,7 @@ import Backend.Cookie (getConfigFromFile)
 import Control.Lens hiding ((.=))
 import Data.Aeson
 import Data.Aeson.Lens
+import Data.List (intercalate)
 import Data.Scientific (toRealFloat)
 import qualified Data.Text as T
 import Network.HTTP.Req
@@ -66,7 +67,14 @@ unpackFloat val = case val of
   Just (Number val) -> toRealFloat val
   _ -> 0
 
-darkModeCss = "<style> body { background: #282a36; color: white; }</style>\n"
+darkModeCss =
+  intercalate
+    ""
+    [ "<style>",
+      "body { background: #282a36; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }",
+      "pre { white-space: pre-wrap; }",
+      "</style>\n"
+    ]
 
 getProblemAddress :: String -> String
 getProblemAddress slug = "https://leetcode.com/problems/" ++ slug
