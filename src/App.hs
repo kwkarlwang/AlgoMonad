@@ -2,9 +2,8 @@
 
 {-# OPTIONS -Wunused-imports #-}
 
-module Frontend.App where
+module App where
 
-import qualified Backend.Problem as P
 import Brick
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
@@ -13,6 +12,8 @@ import Frontend.KeyBinding (handleTuiEvent)
 import Frontend.Render (drawTui)
 import Frontend.State
 import Frontend.Utils (colorMap)
+import qualified ProblemList.Request as PR
+import qualified ProblemList.State as P
 import UserInfo.Request (getUserInfo)
 import UserInfo.State (UserInfo (premium))
 
@@ -36,7 +37,7 @@ buildInitialState :: IO TuiState
 buildInitialState =
   do
     userInfo <- getUserInfo
-    problems <- P.getProblems
+    problems <- PR.getProblems
     let submissions = V.empty
     let isCurrentUserPremium = premium userInfo
     let filterProblems = if isCurrentUserPremium then problems else V.filter (not . P.paidOnly) problems

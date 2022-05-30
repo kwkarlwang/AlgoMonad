@@ -1,7 +1,6 @@
 {-# OPTIONS -Wunused-imports #-}
 module Frontend.KeyBinding where
 
-import qualified Backend.Problem as P
 import qualified Backend.ProblemDetail as PD
 import qualified Backend.Submission as S
 import qualified Backend.SubmissionDetail as SD
@@ -18,9 +17,10 @@ import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Char (isDigit, isUpper, toLower)
 import Data.List (isInfixOf)
 import qualified Data.Vector as V
-import Frontend.Problem (showTitle)
 import Frontend.State
 import Graphics.Vty.Input.Events
+import ProblemList.Render (showTitle)
+import qualified ProblemList.State as P
 import Web.Browser (openBrowser)
 
 emptyEditor = E.editor DownloadSearchView (Just 1) ""

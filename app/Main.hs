@@ -1,7 +1,7 @@
 module Main where
 
+import App (tui)
 import Backend.Cookie (chromeMacPath, getChromeCookie)
-import Frontend.App (tui)
 import System.Environment (getArgs)
 
 main :: IO ()

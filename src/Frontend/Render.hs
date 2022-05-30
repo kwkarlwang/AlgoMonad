@@ -5,7 +5,6 @@ import Brick
 import Brick.Widgets.Border
 import qualified Brick.Widgets.Edit as E
 import Frontend.Help
-import qualified Frontend.Problem as P
 import qualified Frontend.ProblemDetail as PD
 import Frontend.State
 import qualified Frontend.Submission as S
@@ -13,6 +12,7 @@ import qualified Frontend.SubmissionDetail as SD
 import qualified Frontend.SubmissionReport as SR
 import qualified Frontend.Tab as Tab
 import Frontend.Utils
+import qualified ProblemList.Render as P
 import qualified UserInfo.Render as UI
 
 drawTui :: TuiState -> [Widget ResourceName]

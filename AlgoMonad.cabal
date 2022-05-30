@@ -25,13 +25,13 @@ source-repository head
 
 library
   exposed-modules:
+      App
       Backend.Cookie
       Backend.Problem
       Backend.ProblemDetail
       Backend.Submission
       Backend.SubmissionDetail
       Backend.Utils
-      Frontend.App
       Frontend.Help
       Frontend.KeyBinding
       Frontend.Problem
@@ -43,6 +43,9 @@ library
       Frontend.SubmissionReport
       Frontend.Tab
       Frontend.Utils
+      ProblemList.Render
+      ProblemList.Request
+      ProblemList.State
       UserInfo.Render
       UserInfo.Request
       UserInfo.State

@@ -87,25 +87,16 @@ extractUserInfo userInfoJson questionCountJson = do
 
 getUserInfo :: IO UserInfo
 getUserInfo = do
+  let retryError = "Please login in to leetcode in Chrome and try again"
   userInfoJson <- requestUserInfo >>= getResponseBody
   case userInfoJson of
-    Null -> error "Please login in to leetcode in Chrome and try again"
+    Null -> error retryError
     _ -> do
       let username = fmap T.unpack $ userInfoJson ^? key "user" . key "username" . _String
       case username of
-        Nothing -> error "Please login in to leetcode in Chrome and try again"
+        Nothing -> error retryError
         Just username -> do
           questionCountJson <- requestUserQuestionCount username >>= getResponseBody
           case extractUserInfo userInfoJson questionCountJson of
             Just userInfo -> return userInfo
             Nothing -> error "Error parsing UserInfo"
-
--- return $
---   map
---     ( \(key, maybe) ->
---         case maybe of
---           Just (String x) -> (key, init . tail . show $ x)
---           Just (Bool x) -> (key, show x)
---           _ -> error "Need to re login in the browser"
---     )
---     [("username", username), ("premium", isCurrentUserPremium)]
