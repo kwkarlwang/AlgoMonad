@@ -229,7 +229,19 @@ handleEvent s DownloadTab DetailFocus (EvKey KEnter []) = do
         Just (_, currentCodePair) -> do
           liftIO $ PD.writeProblemToFile (slug problemDetail) (content problemDetail) currentCodePair (pid problemDetail)
           continue s {tuiStateMessage = Just "Download successful!"}
-handleEvent s DownloadTab DetailFocus (EvKey (KChar '2') []) = continue s {tuiStateTab = SubmissionTab}
+handleEvent s DownloadTab DetailFocus (EvKey (KChar '2') []) = do
+  submissions <- liftIO S.getSubmissions
+  let oldList = tuiStateSubmissionList s
+  let newList = BL.list SubmissionListView submissions 1
+  let idx = BL.listSelected oldList
+  continue
+    s
+      { tuiStateTab = SubmissionTab,
+        tuiStateSubmissionList =
+          case idx of
+            Just idx -> BL.listMoveTo idx newList
+            Nothing -> newList
+      }
 handleEvent s DownloadTab DetailFocus (EvKey (KChar 'o') []) = do
   newState <- handleOpenProblemInDownload s
   continue newState

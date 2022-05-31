@@ -8,7 +8,7 @@ import Brick
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
 import qualified Data.Vector as V
-import qualified Download.ProblemList.Request as PR
+import qualified Download.ProblemList.Request as PLR
 import qualified Download.ProblemList.State as P
 import Frontend.KeyBinding (handleTuiEvent)
 import Frontend.Render (drawTui)
@@ -37,7 +37,7 @@ buildInitialState :: IO TuiState
 buildInitialState =
   do
     userInfo <- getUserInfo
-    problems <- PR.getProblems
+    problems <- PLR.getProblems
     let submissions = V.empty
     let isCurrentUserPremium = premium userInfo
     let filterProblems = if isCurrentUserPremium then problems else V.filter (not . P.paidOnly) problems
