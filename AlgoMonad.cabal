@@ -27,14 +27,17 @@ library
   exposed-modules:
       App
       Backend.Cookie
-      Backend.Problem
       Backend.ProblemDetail
       Backend.Submission
       Backend.SubmissionDetail
       Backend.Utils
+      Download.ProblemDetail.Request
+      Download.ProblemDetail.State
+      Download.ProblemList.Render
+      Download.ProblemList.Request
+      Download.ProblemList.State
       Frontend.Help
       Frontend.KeyBinding
-      Frontend.Problem
       Frontend.ProblemDetail
       Frontend.Render
       Frontend.State
@@ -43,9 +46,6 @@ library
       Frontend.SubmissionReport
       Frontend.Tab
       Frontend.Utils
-      ProblemList.Render
-      ProblemList.Request
-      ProblemList.State
       UserInfo.Render
       UserInfo.Request
       UserInfo.State

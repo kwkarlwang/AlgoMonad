@@ -5,7 +5,7 @@ import Frontend.State (ResourceName)
 import Frontend.Utils (drawGreen, drawRed, drawStr, drawYellow)
 
 renderHelp :: Widget ResourceName
-renderHelp = padLeftRight 2 $ hBox [vBox $ map (\tup -> drawYellow False $ fst tup ++ " ") help, vBox $ map (drawStr False . snd) help]
+renderHelp = padLeftRight 2 $ hBox [vBox $ map (\tup -> drawYellow $ fst tup ++ " ") help, vBox $ map (drawStr . snd) help]
 
 help =
   [ ("Pro tip", "select language with SHIFT+"),

@@ -4,6 +4,7 @@ module Frontend.Render where
 import Brick
 import Brick.Widgets.Border
 import qualified Brick.Widgets.Edit as E
+import qualified Download.ProblemList.Render as P
 import Frontend.Help
 import qualified Frontend.ProblemDetail as PD
 import Frontend.State
@@ -12,7 +13,6 @@ import qualified Frontend.SubmissionDetail as SD
 import qualified Frontend.SubmissionReport as SR
 import qualified Frontend.Tab as Tab
 import Frontend.Utils
-import qualified ProblemList.Render as P
 import qualified UserInfo.Render as UI
 
 drawTui :: TuiState -> [Widget ResourceName]
@@ -40,7 +40,7 @@ drawDownload ts =
     -- bottom
     bottomWidget = case tuiStateMessage ts of
       Nothing -> E.renderEditor (str . unlines) (currentFocus == SearchFocus) (tuiStateDownloadSearch ts)
-      Just message -> drawGreen False message
+      Just message -> drawGreen message
 
 drawSubmission :: TuiState -> [Widget ResourceName]
 drawSubmission ts =
@@ -68,4 +68,4 @@ drawSubmission ts =
     -- bottom
     bottomWidget = case tuiStateMessage ts of
       Nothing -> E.renderEditor (str . unlines) (currentFocus == SearchFocus) (tuiStateSubmissionSearch ts)
-      Just message -> drawGreen False message
+      Just message -> drawGreen message

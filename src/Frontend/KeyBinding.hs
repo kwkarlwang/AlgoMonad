@@ -17,10 +17,10 @@ import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Char (isDigit, isUpper, toLower)
 import Data.List (isInfixOf)
 import qualified Data.Vector as V
+import Download.ProblemList.Render (showTitle)
+import qualified Download.ProblemList.State as P
 import Frontend.State
 import Graphics.Vty.Input.Events
-import ProblemList.Render (showTitle)
-import qualified ProblemList.State as P
 import Web.Browser (openBrowser)
 
 emptyEditor = E.editor DownloadSearchView (Just 1) ""

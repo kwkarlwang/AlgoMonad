@@ -4,7 +4,7 @@ module Frontend.ProblemDetail where
 import Brick (Widget)
 import Brick.Widgets.List as BL hiding (reverse)
 import Frontend.State (ProblemDetailList (codeDefinitionList), ResourceName)
-import Frontend.Utils (drawStr)
+import Frontend.Utils (drawSelected, drawStr)
 
 renderProblemDetail :: Bool -> ProblemDetailList -> Widget ResourceName
 renderProblemDetail hasFocus problemDetail = BL.renderList renderFunc hasFocus codeList
@@ -14,4 +14,4 @@ renderProblemDetail hasFocus problemDetail = BL.renderList renderFunc hasFocus c
     renderFunc = renderLanguage
 
 renderLanguage :: Bool -> (String, String) -> Widget ResourceName
-renderLanguage bool = drawStr bool . fst
+renderLanguage isSelected = drawSelected isSelected drawStr . fst

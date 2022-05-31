@@ -9,9 +9,9 @@ renderTab :: Tab -> Widget ResourceName
 renderTab tab =
   hLimitPercent 30 $
     hBox
-      [ drawStr False " ",
+      [ drawStr " ",
         drawTab (tab == DownloadTab) "   1 Download   ",
-        drawStr False " ",
+        drawStr " ",
         drawTab (tab == SubmissionTab) "  2 Submission  ",
-        drawStr False " "
+        drawStr " "
       ]

@@ -8,12 +8,12 @@ import Brick
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
 import qualified Data.Vector as V
+import qualified Download.ProblemList.Request as PR
+import qualified Download.ProblemList.State as P
 import Frontend.KeyBinding (handleTuiEvent)
 import Frontend.Render (drawTui)
 import Frontend.State
 import Frontend.Utils (colorMap)
-import qualified ProblemList.Request as PR
-import qualified ProblemList.State as P
 import UserInfo.Request (getUserInfo)
 import UserInfo.State (UserInfo (premium))
 

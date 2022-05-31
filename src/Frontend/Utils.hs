@@ -13,6 +13,7 @@ colorMap =
   [ ("white", fg brightWhite),
     ("bold" <> "white", withStyle (fg brightWhite) bold),
     ("selected" <> "black", withStyle (black `on` magenta) bold),
+    ("unfocus" <> "selected" <> "black", withStyle (black `on` white) bold),
     ("red", fg red),
     ("selected" <> "red", withStyle (black `on` magenta) bold),
     ("bold" <> "red", withStyle (fg red) bold),
@@ -30,26 +31,32 @@ colorMap =
     (borderAttr, fg brightWhite)
   ]
 
-drawStr :: Bool -> String -> Widget n
-drawStr b = (if b then withAttr ("selected" <> "black") else withAttr "white") . str
+drawStr :: String -> Widget n
+drawStr = withAttr "white" . str
+
+drawSelectedStr :: String -> Widget n
+drawSelectedStr = withAttr ("selected" <> "black") . str
+
+drawUnfocusStr :: String -> Widget n
+drawUnfocusStr = withAttr ("unfocus" <> "selected" <> "black") . str
 
 drawBoldStr :: String -> Widget n
 drawBoldStr = withAttr ("bold" <> "white") . str
 
-drawRed :: Bool -> String -> Widget n
-drawRed b = (if b then withAttr ("selected" <> "red") else withAttr "red") . str
+drawRed :: String -> Widget n
+drawRed = withAttr "red" . str
 
 drawBoldRed :: String -> Widget n
 drawBoldRed = withAttr ("bold" <> "red") . str
 
-drawGreen :: Bool -> String -> Widget n
-drawGreen b = (if b then withAttr ("selected" <> "green") else withAttr "green") . str
+drawGreen :: String -> Widget n
+drawGreen = withAttr "green" . str
 
 drawBoldGreen :: String -> Widget n
 drawBoldGreen = withAttr ("bold" <> "green") . str
 
-drawYellow :: Bool -> String -> Widget n
-drawYellow b = (if b then withAttr ("selected" <> "yellow") else withAttr "yellow") . str
+drawYellow :: String -> Widget n
+drawYellow = withAttr "yellow" . str
 
 drawBoldYellow :: String -> Widget n
 drawBoldYellow = withAttr ("bold" <> "yellow") . str
@@ -62,6 +69,15 @@ drawCyan b = (if b then withAttr ("selected" <> "cyan") else withAttr "cyan") . 
 
 drawBoldCyan :: String -> Widget n
 drawBoldCyan = withAttr ("bold" <> "cyan") . str
+
+drawSelected :: Bool -> (String -> Widget n) -> (String -> Widget n)
+drawSelected True def = drawSelectedStr
+drawSelected False def = def
+
+drawSelectedOrUnfocus :: Bool -> Bool -> (String -> Widget n) -> (String -> Widget n)
+drawSelectedOrUnfocus True True def = drawSelectedStr
+drawSelectedOrUnfocus True False def = drawUnfocusStr
+drawSelectedOrUnfocus _ _ def = def
 
 floatDiv :: Integer -> Integer -> Float
 floatDiv = (/) `F.on` fromIntegral

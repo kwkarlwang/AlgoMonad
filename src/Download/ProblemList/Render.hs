@@ -1,5 +1,5 @@
 {-# OPTIONS -Wunused-imports #-}
-module ProblemList.Render where
+module Download.ProblemList.Render where
 
 import Brick
   ( Padding (Max, Pad),
@@ -11,24 +11,24 @@ import Brick
   )
 import Brick.Widgets.List as BL hiding (reverse)
 import Data.Vector as V hiding ((++))
-import Frontend.State (ResourceName)
-import Frontend.Utils (drawGreen, drawRed, drawStr, drawYellow, floatDiv, floatRound)
-import ProblemList.State
+import Download.ProblemList.State
   ( Difficulty (Easy, Hard, Medium),
     Problem (difficulty, pid, status, title, totalAccept, totalSubmit),
     Status (Cleared, NotAttempted, NotCleared),
   )
+import Frontend.State (ResourceName)
+import Frontend.Utils (drawGreen, drawRed, drawSelectedOrUnfocus, drawStr, drawYellow, floatDiv, floatRound)
 
 renderProblem :: Bool -> BL.List ResourceName Problem -> Widget ResourceName
 renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemList
   where
-    renderFunc bool problem = hBox components
+    renderFunc isSelected problem = hBox components
       where
         components =
-          [ renderStatus bool problem,
-            padRight Max $ renderTitle maxTitleWidth bool problem,
-            renderDifficulty maxDifficultyWidth bool problem,
-            renderPercent maxPercentWidth bool problem
+          [ renderStatus hasFocus isSelected problem,
+            padRight Max $ renderTitle hasFocus maxTitleWidth isSelected problem,
+            renderDifficulty hasFocus maxDifficultyWidth isSelected problem,
+            renderPercent hasFocus maxPercentWidth isSelected problem
           ]
 
     problemVector = BL.listElements problemList
@@ -36,47 +36,50 @@ renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemLi
     maxDifficultyWidth = V.maximum $ V.map (textWidth . showDifficulty) problemVector
     maxPercentWidth = V.maximum (V.map (textWidth . showPercent) problemVector)
 
-renderStatus :: Bool -> Problem -> Widget ResourceName
-renderStatus bool problem = padLeftRight 1 widget
+renderStatus :: Bool -> Bool -> Problem -> Widget ResourceName
+renderStatus hasFocus isSelected problem = padLeftRight 1 widget
   where
     currentStatus = status problem
     widget =
-      ( case currentStatus of
-          Cleared -> drawGreen
-          NotCleared -> drawRed
-          NotAttempted -> drawStr
-      )
-        bool
+      drawSelectedOrUnfocus
+        isSelected
+        hasFocus
+        ( case currentStatus of
+            Cleared -> drawGreen
+            NotCleared -> drawRed
+            NotAttempted -> drawStr
+        )
         $ showStatus
           problem
 
-renderTitle :: Int -> Bool -> Problem -> Widget ResourceName
-renderTitle maxPad bool problem = padRight (Pad (maxPad - titleWidth)) widget
+renderTitle :: Bool -> Int -> Bool -> Problem -> Widget ResourceName
+renderTitle hasFocus maxPad isSelected problem = padRight (Pad (maxPad - titleWidth)) widget
   where
     titleString = showTitle problem
-    widget = drawStr bool titleString
+    widget = drawSelectedOrUnfocus isSelected hasFocus drawStr titleString
     titleWidth = textWidth titleString
 
-renderDifficulty :: Int -> Bool -> Problem -> Widget ResourceName
-renderDifficulty maxPad bool problem = padRight (Pad (maxPad - difficultyWidth + 4)) widget
+renderDifficulty :: Bool -> Int -> Bool -> Problem -> Widget ResourceName
+renderDifficulty hasFocus maxPad isSelected problem = padRight (Pad (maxPad - difficultyWidth + 4)) widget
   where
     difficultyString = showDifficulty problem
     widget =
-      ( case difficulty problem of
-          Easy -> drawGreen
-          Medium -> drawYellow
-          Hard -> drawRed
-      )
-        bool
+      drawSelectedOrUnfocus
+        isSelected
+        hasFocus
+        ( case difficulty problem of
+            Easy -> drawGreen
+            Medium -> drawYellow
+            Hard -> drawRed
+        )
         difficultyString
-
     difficultyWidth = textWidth difficultyString
 
-renderPercent :: Int -> Bool -> Problem -> Widget ResourceName
-renderPercent maxPad bool problem = padRight (Pad (maxPad - percentWidth)) widget
+renderPercent :: Bool -> Int -> Bool -> Problem -> Widget ResourceName
+renderPercent hasFocus maxPad isSelected problem = padRight (Pad (maxPad - percentWidth)) widget
   where
     percentString = showPercent problem
-    widget = drawStr bool percentString
+    widget = drawSelectedOrUnfocus isSelected hasFocus drawStr percentString
     percentWidth = textWidth percentString
 
 showStatus :: Problem -> String

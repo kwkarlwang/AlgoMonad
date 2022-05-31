@@ -6,7 +6,7 @@ import Backend.SubmissionDetail (SubmissionReport)
 import Brick (EventM, Next)
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
-import ProblemList.State
+import Download.ProblemList.State
 import UserInfo.State (UserInfo)
 
 data Focus

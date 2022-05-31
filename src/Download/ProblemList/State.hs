@@ -2,7 +2,7 @@
 
 {-# OPTIONS -Wunused-imports #-}
 
-module ProblemList.State where
+module Download.ProblemList.State where
 
 data Status = Cleared | NotCleared | NotAttempted deriving (Eq)
 
