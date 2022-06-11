@@ -40,7 +40,9 @@ handleFocusProblemDetail s = do
               { pid = PD.pid problemDetail,
                 slug = PD.slug problemDetail,
                 content = PD.content problemDetail,
-                codeDefinitionList = BL.list DownloadDetailView (PD.codeDefinitionVector problemDetail) 1
+                codeSnippets = BL.list DownloadDetailView (PD.codeDefinitionVector problemDetail) 1,
+                likes = PD.likes problemDetail,
+                dislikes = PD.dislikes problemDetail
               }
       return s {tuiStateDownloadFocus = DetailFocus, tuiStateProblemDetail = Just problemDetailList}
 
@@ -62,25 +64,29 @@ handleProblemDetail s e@(EvKey (KChar char) []) = do
   let oldProblemDetail = tuiStateProblemDetail s
   case (oldProblemDetail, currentFocus, isUpper char) of
     (Just oldProblemDetail, DetailFocus, True) -> do
-      let oldCodeDefinitionList = codeDefinitionList oldProblemDetail
+      let oldCodeDefinitionList = codeSnippets oldProblemDetail
       let newCodeDefinitionList = BL.listFindBy (\tup -> (toLower . head) (fst tup) == toLower char) oldCodeDefinitionList
       let newProblemDetail =
             ProblemDetailList
               { slug = slug oldProblemDetail,
                 content = content oldProblemDetail,
-                codeDefinitionList = newCodeDefinitionList,
-                pid = pid oldProblemDetail
+                codeSnippets = newCodeDefinitionList,
+                pid = pid oldProblemDetail,
+                likes = likes oldProblemDetail,
+                dislikes = dislikes oldProblemDetail
               }
       return $ s {tuiStateProblemDetail = Just newProblemDetail}
     (Just oldProblemDetail, DetailFocus, False) -> do
-      let oldCodeDefinitionList = codeDefinitionList oldProblemDetail
+      let oldCodeDefinitionList = codeSnippets oldProblemDetail
       newCodeDefinitionList <- BL.handleListEventVi (\_ l -> return l) e oldCodeDefinitionList
       let newProblemDetail =
             ProblemDetailList
               { slug = slug oldProblemDetail,
                 content = content oldProblemDetail,
-                codeDefinitionList = newCodeDefinitionList,
-                pid = pid oldProblemDetail
+                codeSnippets = newCodeDefinitionList,
+                pid = pid oldProblemDetail,
+                likes = likes oldProblemDetail,
+                dislikes = dislikes oldProblemDetail
               }
       return $ s {tuiStateProblemDetail = Just newProblemDetail}
     _ -> return s
@@ -89,14 +95,16 @@ handleProblemDetail s e = do
   let oldProblemDetail = tuiStateProblemDetail s
   case (oldProblemDetail, currentFocus) of
     (Just oldProblemDetail, DetailFocus) -> do
-      let oldCodeDefinitionList = codeDefinitionList oldProblemDetail
+      let oldCodeDefinitionList = codeSnippets oldProblemDetail
       newCodeDefinitionList <- BL.handleListEventVi (\_ l -> return l) e oldCodeDefinitionList
       let newProblemDetail =
             ProblemDetailList
               { slug = slug oldProblemDetail,
                 content = content oldProblemDetail,
-                codeDefinitionList = newCodeDefinitionList,
-                pid = pid oldProblemDetail
+                codeSnippets = newCodeDefinitionList,
+                pid = pid oldProblemDetail,
+                likes = likes oldProblemDetail,
+                dislikes = dislikes oldProblemDetail
               }
       return $ s {tuiStateProblemDetail = Just newProblemDetail}
     _ -> return s
@@ -223,7 +231,7 @@ handleEvent s DownloadTab DetailFocus (EvKey KEnter []) = do
   case problemDetail of
     Nothing -> continue s
     Just problemDetail -> do
-      let currentCodePair = BL.listSelectedElement $ codeDefinitionList problemDetail
+      let currentCodePair = BL.listSelectedElement $ codeSnippets problemDetail
       case currentCodePair of
         Nothing -> continue s
         Just (_, currentCodePair) -> do

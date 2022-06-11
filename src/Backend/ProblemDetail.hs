@@ -10,8 +10,6 @@ import Data.Aeson
 import Data.Aeson.Lens
 import Data.List (intercalate)
 import qualified Data.Text as T (Text, unpack)
-import qualified Data.Text.Lazy as TL (fromStrict)
-import qualified Data.Text.Lazy.Encoding as TLE (encodeUtf8)
 import qualified Data.Vector as V
 import Network.HTTP.Req
 import qualified System.Directory as DIR
@@ -20,7 +18,9 @@ data ProblemDetail = ProblemDetail
   { pid :: Integer,
     slug :: String,
     content :: String,
-    codeDefinitionVector :: V.Vector (String, String)
+    codeDefinitionVector :: V.Vector (String, String),
+    likes :: Integer,
+    dislikes :: Integer
   }
   deriving (Eq, Show)
 
@@ -35,7 +35,12 @@ requestProblemDetail slug = req POST (https "leetcode.com" /: "graphql") (ReqBod
               [ "query getQuestionDetail($titleSlug: String!) {",
                 "  question(titleSlug: $titleSlug) {",
                 "    content",
-                "    codeDefinition",
+                "    codeSnippets {",
+                "       langSlug",
+                "       code",
+                "    }",
+                "    likes",
+                "    dislikes",
                 "  }",
                 "}"
               ],
@@ -48,20 +53,20 @@ valueToText (String x) = x
 valueToText _ = error "Not Text"
 
 makeProblemDetailCode :: Array -> Maybe (V.Vector (String, String))
-makeProblemDetailCode codeDefinition =
+makeProblemDetailCode codeSnippets =
   do
-    codeKey <- V.mapM (\value -> T.unpack . valueToText <$> value ^? key "value") codeDefinition
-    codeValue <- V.mapM (\value -> T.unpack . valueToText <$> value ^? key "defaultCode") codeDefinition
+    codeKey <- V.mapM (\value -> T.unpack <$> value ^? key "langSlug" . _String) codeSnippets
+    codeValue <- V.mapM (\value -> T.unpack <$> value ^? key "code" . _String) codeSnippets
     return $ V.zip codeKey codeValue
 
 extractProblemDetail :: String -> Value -> Integer -> Maybe ProblemDetail
 extractProblemDetail slug value pid = do
   questionData <- value ^? key "question"
-  content <- T.unpack . valueToText <$> questionData ^? key "content"
-  codeDefinitionStr <- valueToText <$> questionData ^? key "codeDefinition"
-  let codeDefinitionText = TLE.encodeUtf8 $ TL.fromStrict codeDefinitionStr
-  codeDefinitionValue <- decode codeDefinitionText :: Maybe Array
-  codeDefinitionVector <- makeProblemDetailCode codeDefinitionValue
+  content <- T.unpack <$> questionData ^? key "content" . _String
+  codeSnippets <- questionData ^? key "codeSnippets" . _Array
+  codeDefinitionVector <- makeProblemDetailCode codeSnippets
+  likes <- questionData ^? key "likes" . _Integer
+  dislikes <- questionData ^? key "dislikes" . _Integer
   return $ ProblemDetail {..}
 
 getProblemDetail :: String -> Integer -> IO ProblemDetail

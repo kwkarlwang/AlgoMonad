@@ -39,7 +39,9 @@ data ProblemDetailList = ProblemDetailList
   { pid :: Integer,
     slug :: String,
     content :: String,
-    codeDefinitionList :: BL.List ResourceName (String, String)
+    codeSnippets :: BL.List ResourceName (String, String),
+    likes :: Integer,
+    dislikes :: Integer
   }
   deriving (Show)
 
