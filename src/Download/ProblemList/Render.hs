@@ -13,7 +13,7 @@ import Brick.Widgets.List as BL hiding (reverse)
 import Data.Vector as V hiding ((++))
 import Download.ProblemList.State
   ( Difficulty (Easy, Hard, Medium),
-    Problem (difficulty, pid, status, title, totalAccept, totalSubmit),
+    Problem (difficulty, paidOnly, pid, status, title, totalAccept, totalSubmit),
     Status (Cleared, NotAttempted, NotCleared),
   )
 import Frontend.State (ResourceName)
@@ -22,14 +22,18 @@ import Frontend.Utils (drawGreen, drawRed, drawSelectedOrUnfocus, drawStr, drawY
 renderProblem :: Bool -> BL.List ResourceName Problem -> Widget ResourceName
 renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemList
   where
+    renderFunc :: Bool -> Problem -> Widget ResourceName
     renderFunc isSelected problem = hBox components
       where
         components =
-          [ renderStatus hasFocus isSelected problem,
-            padRight Max $ renderTitle hasFocus maxTitleWidth isSelected problem,
-            renderDifficulty hasFocus maxDifficultyWidth isSelected problem,
-            renderPercent hasFocus maxPercentWidth isSelected problem
-          ]
+          Prelude.map
+            (\f -> f hasFocus isSelected problem)
+            [ renderStatus,
+              \f s p -> padRight Max $ renderTitle maxTitleWidth f s p,
+              renderDifficulty maxDifficultyWidth,
+              renderPaidOnly,
+              renderPercent maxPercentWidth
+            ]
 
     problemVector = BL.listElements problemList
     maxTitleWidth = V.maximum $ V.map (textWidth . showTitle) problemVector
@@ -52,15 +56,15 @@ renderStatus hasFocus isSelected problem = padLeftRight 1 widget
         $ showStatus
           problem
 
-renderTitle :: Bool -> Int -> Bool -> Problem -> Widget ResourceName
-renderTitle hasFocus maxPad isSelected problem = padRight (Pad (maxPad - titleWidth)) widget
+renderTitle :: Int -> Bool -> Bool -> Problem -> Widget ResourceName
+renderTitle maxPad hasFocus isSelected problem = padRight (Pad (maxPad - titleWidth)) widget
   where
     titleString = showTitle problem
     widget = drawSelectedOrUnfocus isSelected hasFocus drawStr titleString
     titleWidth = textWidth titleString
 
-renderDifficulty :: Bool -> Int -> Bool -> Problem -> Widget ResourceName
-renderDifficulty hasFocus maxPad isSelected problem = padRight (Pad (maxPad - difficultyWidth + 4)) widget
+renderDifficulty :: Int -> Bool -> Bool -> Problem -> Widget ResourceName
+renderDifficulty maxPad hasFocus isSelected problem = padRight (Pad (maxPad - difficultyWidth)) widget
   where
     difficultyString = showDifficulty problem
     widget =
@@ -75,8 +79,14 @@ renderDifficulty hasFocus maxPad isSelected problem = padRight (Pad (maxPad - di
         difficultyString
     difficultyWidth = textWidth difficultyString
 
-renderPercent :: Bool -> Int -> Bool -> Problem -> Widget ResourceName
-renderPercent hasFocus maxPad isSelected problem = padRight (Pad (maxPad - percentWidth)) widget
+renderPaidOnly :: Bool -> Bool -> Problem -> Widget ResourceName
+renderPaidOnly hasFocus isSelected problem = widget
+  where
+    paidSymbol = if paidOnly problem then "$" else " "
+    widget = padLeftRight 2 $ drawSelectedOrUnfocus isSelected hasFocus drawGreen paidSymbol
+
+renderPercent :: Int -> Bool -> Bool -> Problem -> Widget ResourceName
+renderPercent maxPad hasFocus isSelected problem = padRight (Pad (maxPad - percentWidth)) widget
   where
     percentString = showPercent problem
     widget = drawSelectedOrUnfocus isSelected hasFocus drawStr percentString
