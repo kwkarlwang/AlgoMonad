@@ -20,10 +20,15 @@ import qualified Data.Vector as V
 import Download.ProblemList.Render (showTitle)
 import qualified Download.ProblemList.State as P
 import Frontend.State
+import qualified Frontend.Submission as FS
 import Graphics.Vty.Input.Events
 import Web.Browser (openBrowser)
 
 emptyEditor = E.editor DownloadSearchView (Just 1) ""
+
+getSearch :: Tab -> TuiState -> E.Editor String ResourceName
+getSearch DownloadTab = tuiStateDownloadSearch
+getSearch SubmissionTab = tuiStateSubmissionSearch
 
 handleFocusProblem :: TuiState -> EventM ResourceName TuiState
 handleFocusProblem s = return s {tuiStateDownloadFocus = ListFocus, tuiStateProblemDetail = Nothing}
@@ -50,7 +55,11 @@ handleSearch :: TuiState -> Event -> EventM ResourceName TuiState
 handleSearch s e = do
   let newSearch = emptyEditor
   newSearchMoveCursor <- E.handleEditorEvent e newSearch
-  return s {tuiStateDownloadFocus = SearchFocus, tuiStateDownloadSearch = newSearchMoveCursor}
+  return
+    ( case tuiStateTab s of
+        DownloadTab -> s {tuiStateDownloadFocus = SearchFocus, tuiStateDownloadSearch = newSearchMoveCursor}
+        SubmissionTab -> s {tuiStateSubmissionFocus = SearchFocus, tuiStateSubmissionSearch = newSearchMoveCursor}
+    )
 
 handleProblemList :: TuiState -> Event -> EventM ResourceName TuiState
 handleProblemList s e = do
@@ -180,10 +189,10 @@ handleEvent s _ ListFocus (EvKey (KChar 'q') []) = halt s
 handleEvent s DownloadTab ListFocus (EvKey (KChar 'l') []) = do
   newState <- handleFocusProblemDetail s
   continue newState
-handleEvent s DownloadTab ListFocus e@(EvKey (KChar '/') []) = do
+handleEvent s _ ListFocus e@(EvKey (KChar '/') []) = do
   newState <- handleSearch s e
   continue newState
-handleEvent s DownloadTab ListFocus e@(EvKey (KChar '=') []) = do
+handleEvent s _ ListFocus e@(EvKey (KChar ':') []) = do
   newState <- handleSearch s e
   continue newState
 -- Search next occurance
@@ -192,7 +201,7 @@ handleEvent s DownloadTab ListFocus e@(EvKey (KChar 'n') []) = do
   let problemList = tuiStateProblemList s
   let searchText = head $ E.getEditContents search
   let filterCondition p = case head searchText of
-        '=' -> do
+        ':' -> do
           let problemId = read $ tail searchText :: Integer
           problemId == P.pid p
         _ -> do
@@ -226,6 +235,7 @@ handleEvent s _ DetailFocus (EvKey (KChar 'q') []) = halt s
 handleEvent s DownloadTab DetailFocus (EvKey (KChar 'h') []) = do
   newState <- handleFocusProblem s
   continue newState
+-- download question
 handleEvent s DownloadTab DetailFocus (EvKey KEnter []) = do
   let problemDetail = tuiStateProblemDetail s
   case problemDetail of
@@ -264,7 +274,7 @@ handleEvent s DownloadTab SearchFocus (EvKey KEnter []) = do
   let filterCondition p = case (head searchText, tail searchText) of
         (_, "") -> do
           False
-        ('=', searchText) -> do
+        (':', searchText) -> do
           let problemId = read searchText :: Integer
           problemId == P.pid p
         (_, searchText) -> do
@@ -274,24 +284,24 @@ handleEvent s DownloadTab SearchFocus (EvKey KEnter []) = do
   continue s {tuiStateDownloadFocus = ListFocus, tuiStateProblemList = newProblemList}
 handleEvent s DownloadTab SearchFocus (EvKey KEsc []) = do
   continue s {tuiStateDownloadFocus = ListFocus, tuiStateDownloadSearch = emptyEditor}
-handleEvent s DownloadTab SearchFocus e@(EvKey KBS []) = do
-  let oldSearch = tuiStateDownloadSearch s
+handleEvent s tab SearchFocus e@(EvKey KBS []) = do
+  let oldSearch = getSearch tab s
   newSearch <- E.handleEditorEvent e oldSearch
   let content = head $ E.getEditContents newSearch
   let focus = if null content then ListFocus else SearchFocus
-  continue s {tuiStateDownloadSearch = newSearch, tuiStateDownloadFocus = focus}
-handleEvent s DownloadTab SearchFocus e@(EvKey (KChar char) _) = do
-  let oldSearch = tuiStateDownloadSearch s
+  case tab of
+    DownloadTab -> continue s {tuiStateDownloadSearch = newSearch, tuiStateDownloadFocus = focus}
+    SubmissionTab -> continue s {tuiStateSubmissionSearch = newSearch, tuiStateSubmissionFocus = focus}
+handleEvent s tab SearchFocus e@(EvKey (KChar char) _) = do
+  let oldSearch = getSearch tab s
   let content = head $ E.getEditContents oldSearch
   newSearch <- case (head content, isDigit char) of
-    ('=', True) -> E.handleEditorEvent e oldSearch
+    (':', True) -> E.handleEditorEvent e oldSearch
     ('/', _) -> E.handleEditorEvent e oldSearch
     (_, _) -> return oldSearch
-  continue s {tuiStateDownloadSearch = newSearch}
-handleEvent s DownloadTab SearchFocus e = do
-  let oldSearch = tuiStateDownloadSearch s
-  newSearch <- E.handleEditorEvent e oldSearch
-  continue s {tuiStateDownloadSearch = newSearch}
+  if tab == DownloadTab
+    then continue s {tuiStateDownloadSearch = newSearch}
+    else continue s {tuiStateSubmissionSearch = newSearch}
 -- Submission
 -- List
 handleEvent s SubmissionTab ListFocus (EvKey (KChar 'l') []) = do
@@ -332,7 +342,30 @@ handleEvent s SubmissionTab DetailFocus (EvKey (KChar '1') []) = continue s {tui
 handleEvent s SubmissionTab DetailFocus e = do
   newState <- handleSubmissionDetail s e
   continue newState
-handleEvent s _ _ _ = continue s
+handleEvent s SubmissionTab SearchFocus (EvKey KEnter []) = do
+  let search = tuiStateSubmissionSearch s
+  let submissionList = tuiStateSubmissionList s
+  let searchText = head $ E.getEditContents search
+  let filterCondition s = case (head searchText, tail searchText) of
+        (_, "") -> do
+          False
+        (':', searchText) -> do
+          let problemId = read searchText :: Integer
+          problemId == S.pid s
+        (_, searchText) -> do
+          let content = map toLower searchText
+          content `isInfixOf` map toLower (FS.showTitle s)
+  let newProblemList = BL.listFindBy filterCondition submissionList
+  continue s {tuiStateSubmissionFocus = ListFocus, tuiStateSubmissionList = newProblemList}
+handleEvent s SubmissionTab SearchFocus (EvKey KEsc []) = do
+  continue s {tuiStateSubmissionFocus = ListFocus, tuiStateSubmissionSearch = emptyEditor}
+-- all other case
+handleEvent s tab SearchFocus e = do
+  let oldSearch = getSearch tab s
+  newSearch <- E.handleEditorEvent e oldSearch
+  case tab of
+    DownloadTab -> continue s {tuiStateDownloadSearch = newSearch}
+    SubmissionTab -> continue s {tuiStateSubmissionSearch = newSearch}
 
 handleTuiEvent :: TuiState -> BrickEvent n e -> NewState
 handleTuiEvent s e =

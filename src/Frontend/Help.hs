@@ -19,7 +19,7 @@ help =
     ("enter", "download|submit question"),
     ("o", "open question in browser"),
     ("/", "search by title"),
-    ("=", "search by id"),
+    (":", "search by id"),
     ("n", "search next occurance"),
     ("g", "move to top"),
     ("G", "move to bottom"),

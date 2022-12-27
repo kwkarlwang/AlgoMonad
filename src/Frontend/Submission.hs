@@ -15,5 +15,8 @@ renderSubmission = BL.renderList renderFunc
 renderTitle :: Bool -> Submission -> Widget ResourceName
 renderTitle isSelected submission = widget
   where
-    title = " " ++ (show . pid) submission ++ "." ++ slug submission
+    title = " " ++ showTitle submission
     widget = drawSelected isSelected drawStr title
+
+showTitle :: Submission -> String
+showTitle submission = (show . pid) submission ++ "." ++ slug submission
