@@ -43,9 +43,7 @@ drawDownload ts =
       Just message -> drawGreen message
 
 drawSubmission :: TuiState -> [Widget ResourceName]
-drawSubmission ts =
-  [ vBox [topWidget, submissionWidget, bottomWidget]
-  ]
+drawSubmission ts = [vBox [topWidget, submissionWidget, bottomWidget]]
   where
     currentFocus = tuiStateSubmissionFocus ts
     userInfoWidget = UI.renderUserInfo $ tuiStateUserInfo ts

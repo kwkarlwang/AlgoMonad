@@ -107,18 +107,28 @@ handleRefresh s = do
         tuiStateMessage = Just "Refresh successfully!"
       }
 
+handleReverseSearch :: TuiState -> Tab -> EventM ResourceName TuiState
+handleReverseSearch s DownloadTab = do
+  let problemList = BL.listReverse $ tuiStateProblemList s
+  newState <- handleSearch s {tuiStateProblemList = problemList} DownloadTab
+  return newState {tuiStateProblemList = BL.listReverse $ tuiStateProblemList newState}
+handleReverseSearch s SubmissionTab = do
+  let submissionList = BL.listReverse $ tuiStateSubmissionList s
+  newState <- handleSearch s {tuiStateSubmissionList = submissionList} SubmissionTab
+  return newState {tuiStateSubmissionList = BL.listReverse $ tuiStateSubmissionList newState}
+
 handleSearch :: TuiState -> Tab -> EventM ResourceName TuiState
 handleSearch s DownloadTab = do
   let search = tuiStateDownloadSearch s
   let problemList = tuiStateProblemList s
   let searchText = head $ E.getEditContents search
-  let filterCondition p = case (head searchText, tail searchText) of
-        (_, "") -> do
+  let filterCondition p = case (searchText, head searchText, tail searchText) of
+        ("", _, _) -> do
           False
-        (':', searchText) -> do
+        (_, ':', searchText) -> do
           let problemId = read searchText :: Integer
           problemId == P.pid p
-        (_, searchText) -> do
+        (_, _, searchText) -> do
           let content = map toLower searchText
           content `isInfixOf` map toLower (showTitle p)
   let newProblemList = BL.listFindBy filterCondition problemList
@@ -127,13 +137,13 @@ handleSearch s SubmissionTab = do
   let search = tuiStateSubmissionSearch s
   let submissionList = tuiStateSubmissionList s
   let searchText = head $ E.getEditContents search
-  let filterCondition s = case (head searchText, tail searchText) of
-        (_, "") -> do
+  let filterCondition s = case (searchText, head searchText, tail searchText) of
+        ("", _, _) -> do
           False
-        (':', searchText) -> do
+        (_, ':', searchText) -> do
           let problemId = read searchText :: Integer
           problemId == S.pid s
-        (_, searchText) -> do
+        (_, _, searchText) -> do
           let content = map toLower searchText
           content `isInfixOf` map toLower (FS.showTitle s)
   let newSubmissionList = BL.listFindBy filterCondition submissionList
@@ -300,6 +310,7 @@ handleEvent s _ ListFocus e@(EvKey (KChar ':') []) = handleSearchInput s e >>= c
 handleEvent s tab ListFocus (EvKey (KChar 's') []) = handleSwitching s tab ListFocus >>= continue
 -- Search next occurance
 handleEvent s tab ListFocus e@(EvKey (KChar 'n') []) = handleSearch s tab >>= continue
+handleEvent s tab ListFocus e@(EvKey (KChar 'N') []) = handleReverseSearch s tab >>= continue
 handleEvent s DownloadTab ListFocus (EvKey (KChar '2') []) = do
   newState <- handleGetSubmissions s
   continue newState {tuiStateTab = SubmissionTab}

@@ -74,6 +74,7 @@ drawSelected :: Bool -> (String -> Widget n) -> (String -> Widget n)
 drawSelected True def = drawSelectedStr
 drawSelected False def = def
 
+--                  isSelected  hasFocus
 drawSelectedOrUnfocus :: Bool -> Bool -> (String -> Widget n) -> (String -> Widget n)
 drawSelectedOrUnfocus True True def = drawSelectedStr
 drawSelectedOrUnfocus True False def = drawUnfocusStr
