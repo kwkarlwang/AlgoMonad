@@ -53,12 +53,36 @@ handleSwitching s DownloadTab ListFocus = do
       let oldList = tuiStateSubmissionList intermediateState
       let newList = BL.listFindBy (\submission -> S.pid submission == targetPid) oldList
       if Just targetPid == (S.pid . snd <$> BL.listSelectedElement newList)
-        then return intermediateState {tuiStateSubmissionList = newList, tuiStateTab = SubmissionTab}
+        then
+          handleFocusSubmission $
+            intermediateState
+              { tuiStateSubmissionList = newList,
+                tuiStateTab = SubmissionTab
+              }
         else return s {tuiStateMessage = Just ("Cannot find problem " ++ show targetPid ++ " in current folder")}
 handleSwitching s DownloadTab DetailFocus = do
   newState <- handleSwitching s DownloadTab ListFocus
   handleFocusSubmissionDetail newState
-handleSwitching s _ _ = undefined
+handleSwitching s SubmissionTab ListFocus = do
+  let maybeSubmission = BL.listSelectedElement $ tuiStateSubmissionList s
+  case maybeSubmission of
+    Nothing -> return s
+    Just (_, submission) -> do
+      let targetPid = S.pid submission
+      let oldList = tuiStateProblemList s
+      let newList = BL.listFindBy (\problem -> P.pid problem == targetPid) oldList
+      if Just targetPid == (P.pid . snd <$> BL.listSelectedElement newList)
+        then
+          handleFocusProblem $
+            s
+              { tuiStateProblemList = newList,
+                tuiStateTab = DownloadTab
+              }
+        else return s {tuiStateMessage = Just ("Cannot find leetcode problem " ++ show targetPid)}
+handleSwitching s SubmissionTab DetailFocus = do
+  newState <- handleSwitching s SubmissionTab ListFocus
+  handleFocusProblemDetail newState
+handleSwitching s _ _ = return s
 
 handleGetSubmissions :: TuiState -> EventM ResourceName TuiState
 handleGetSubmissions s = do
@@ -273,7 +297,7 @@ handleEvent s _ ListFocus (EvKey (KChar 'q') []) = halt s
 handleEvent s DownloadTab ListFocus (EvKey (KChar 'l') []) = handleFocusProblemDetail s >>= continue
 handleEvent s _ ListFocus e@(EvKey (KChar '/') []) = handleSearchInput s e >>= continue
 handleEvent s _ ListFocus e@(EvKey (KChar ':') []) = handleSearchInput s e >>= continue
-handleEvent s tab focus (EvKey (KChar 's') []) = handleSwitching s tab focus >>= continue
+handleEvent s tab ListFocus (EvKey (KChar 's') []) = handleSwitching s tab ListFocus >>= continue
 -- Search next occurance
 handleEvent s tab ListFocus e@(EvKey (KChar 'n') []) = handleSearch s tab >>= continue
 handleEvent s DownloadTab ListFocus (EvKey (KChar '2') []) = do
@@ -287,6 +311,7 @@ handleEvent s DownloadTab ListFocus e = handleProblemList s e >>= continue
 handleEvent s _ DetailFocus (EvKey (KChar 'r') []) = handleRefresh s >>= continue
 handleEvent s _ DetailFocus (EvKey (KChar 'q') []) = halt s
 handleEvent s DownloadTab DetailFocus (EvKey (KChar 'h') []) = handleFocusProblem s >>= continue
+handleEvent s tab DetailFocus (EvKey (KChar 's') []) = handleSwitching s tab DetailFocus >>= continue
 -- download question
 handleEvent s DownloadTab DetailFocus (EvKey KEnter []) = do
   let problemDetail = tuiStateProblemDetail s
@@ -384,11 +409,9 @@ handleEvent s tab SearchFocus e = do
     SubmissionTab -> continue s {tuiStateSubmissionSearch = newSearch}
 
 handleTuiEvent :: TuiState -> BrickEvent n e -> NewState
-handleTuiEvent s e =
-  case e of
-    VtyEvent vtye -> do
-      let currentTab = tuiStateTab s
-      let currentFocus = (if currentTab == DownloadTab then tuiStateDownloadFocus else tuiStateSubmissionFocus) s
-      let s1 = s {tuiStateMessage = Nothing}
-      handleEvent s1 currentTab currentFocus vtye
-    _ -> continue s
+handleTuiEvent s (VtyEvent vtye) = handleEvent s1 currentTab currentFocus vtye
+  where
+    currentTab = tuiStateTab s
+    currentFocus = (if currentTab == DownloadTab then tuiStateDownloadFocus else tuiStateSubmissionFocus) s
+    s1 = s {tuiStateMessage = Nothing}
+handleTuiEvent s _ = continue s

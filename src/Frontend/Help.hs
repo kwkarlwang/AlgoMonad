@@ -12,6 +12,8 @@ help =
     ("", "prefix of the language"),
     (" ", " "),
     ("1|2", "switch tab"),
+    ("r", "refresh problems and user info"),
+    ("s", "switch tab to the same question"),
     ("h", "go back"),
     ("j", "move down"),
     ("k", "move up"),
