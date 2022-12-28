@@ -40,7 +40,10 @@ buildInitialState =
     problems <- PLR.getProblems
     let submissions = V.empty
     let isCurrentUserPremium = premium userInfo
-    let filterProblems = if isCurrentUserPremium then problems else V.filter (not . P.paidOnly) problems
+    let filterProblems =
+          if isCurrentUserPremium
+            then problems
+            else V.filter (not . P.paidOnly) problems
     return $
       TuiState
         { tuiStateUserInfo = userInfo,
