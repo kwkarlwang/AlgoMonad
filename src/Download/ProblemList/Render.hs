@@ -41,7 +41,7 @@ renderProblem hasFocus problemList = BL.renderList renderFunc hasFocus problemLi
     maxPercentWidth = V.maximum (V.map (textWidth . showPercent) problemVector)
 
 renderStatus :: Bool -> Bool -> Problem -> Widget ResourceName
-renderStatus hasFocus isSelected problem = padLeftRight 1 widget
+renderStatus hasFocus isSelected problem = widget
   where
     currentStatus = status problem
     widget =
@@ -53,8 +53,7 @@ renderStatus hasFocus isSelected problem = padLeftRight 1 widget
             NotCleared -> drawRed
             NotAttempted -> drawStr
         )
-        $ showStatus
-          problem
+        $ showStatus problem ++ " "
 
 renderTitle :: Int -> Bool -> Bool -> Problem -> Widget ResourceName
 renderTitle maxPad hasFocus isSelected problem = padRight (Pad (maxPad - titleWidth)) widget
