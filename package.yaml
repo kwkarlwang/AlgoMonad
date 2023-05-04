@@ -41,6 +41,7 @@ dependencies:
   - HUnit == 1.6.2.0
   - scientific == 0.3.3.8
   - open-browser == 0.2.1.0
+  - split == 0.2.3.4
 
 library:
   source-dirs: src

@@ -12,6 +12,7 @@ import Data.Aeson.Lens
 import qualified Data.ByteString.UTF8 as BSU
 import qualified Data.Text as T
 import Network.HTTP.Req
+import Utils.Filter (filterContent)
 
 data SubmissionDetail = SubmissionDetail
   { submissionLang :: String,
@@ -101,7 +102,7 @@ requestVerification submissionId = req GET url NoReqBody jsonResponse <$> getCre
 
 readProblemFromFile :: FilePath -> String -> Integer -> Integer -> IO SubmissionDetail
 readProblemFromFile path slug pid submitPid = do
-  content <- readFile path
+  content <- filterContent <$> readFile path
   let submissionLang = T.unpack . head . T.splitOn "." . last . T.splitOn "/" . T.pack $ path
   let submissionSlug = slug
   return SubmissionDetail {..}
