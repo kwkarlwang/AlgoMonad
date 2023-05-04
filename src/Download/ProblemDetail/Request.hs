@@ -2,7 +2,7 @@
 {-# OPTIONS -Wunused-imports #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Backend.ProblemDetail where
+module Download.ProblemDetail.Request where
 
 import Backend.Utils
 import Control.Lens hiding ((.=))
@@ -10,19 +10,12 @@ import Data.Aeson
 import Data.Aeson.Lens
 import Data.List (intercalate)
 import qualified Data.Text as T (Text, unpack)
+import qualified Data.Text.Lazy as TL (fromStrict)
+import qualified Data.Text.Lazy.Encoding as TLE (encodeUtf8)
 import qualified Data.Vector as V
+import Download.ProblemDetail.State
 import Network.HTTP.Req
 import qualified System.Directory as DIR
-
-data ProblemDetail = ProblemDetail
-  { pid :: Integer,
-    slug :: String,
-    content :: String,
-    codeDefinitionVector :: V.Vector (String, String),
-    likes :: Integer,
-    dislikes :: Integer
-  }
-  deriving (Eq, Show)
 
 requestProblemDetail :: (FromJSON a) => String -> IO (Req (JsonResponse a))
 requestProblemDetail slug = req POST (https "leetcode.com" /: "graphql") (ReqBodyJson payload) jsonResponse <$> getCredentials
@@ -35,12 +28,7 @@ requestProblemDetail slug = req POST (https "leetcode.com" /: "graphql") (ReqBod
               [ "query getQuestionDetail($titleSlug: String!) {",
                 "  question(titleSlug: $titleSlug) {",
                 "    content",
-                "    codeSnippets {",
-                "       langSlug",
-                "       code",
-                "    }",
-                "    likes",
-                "    dislikes",
+                "    codeDefinition",
                 "  }",
                 "}"
               ],
@@ -53,20 +41,20 @@ valueToText (String x) = x
 valueToText _ = error "Not Text"
 
 makeProblemDetailCode :: Array -> Maybe (V.Vector (String, String))
-makeProblemDetailCode codeSnippets =
+makeProblemDetailCode codeDefinition =
   do
-    codeKey <- V.mapM (\value -> T.unpack <$> value ^? key "langSlug" . _String) codeSnippets
-    codeValue <- V.mapM (\value -> T.unpack <$> value ^? key "code" . _String) codeSnippets
+    codeKey <- V.mapM (\value -> T.unpack <$> value ^? key "value" . _String) codeDefinition
+    codeValue <- V.mapM (\value -> T.unpack <$> value ^? key "defaultCode" . _String) codeDefinition
     return $ V.zip codeKey codeValue
 
 extractProblemDetail :: String -> Value -> Integer -> Maybe ProblemDetail
 extractProblemDetail slug value pid = do
   questionData <- value ^? key "question"
   content <- T.unpack <$> questionData ^? key "content" . _String
-  codeSnippets <- questionData ^? key "codeSnippets" . _Array
-  codeDefinitionVector <- makeProblemDetailCode codeSnippets
-  likes <- questionData ^? key "likes" . _Integer
-  dislikes <- questionData ^? key "dislikes" . _Integer
+  codeDefinitionStr <- questionData ^? key "codeDefinition" . _String
+  let codeDefinitionText = TLE.encodeUtf8 $ TL.fromStrict codeDefinitionStr
+  codeDefinitionValue <- decode codeDefinitionText :: Maybe Array
+  codeDefinitionVector <- makeProblemDetailCode codeDefinitionValue
   return $ ProblemDetail {..}
 
 getProblemDetail :: String -> Integer -> IO ProblemDetail

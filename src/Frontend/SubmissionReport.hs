@@ -64,14 +64,13 @@ renderTestcases totalCorrect totalTestcases = widget
   where
     correctWidget = drawBoldStr $ show totalCorrect
     testcasesWidget = drawBoldStr $ show totalTestcases
-    f = drawStr False
     widget =
       hBox
-        [ f "Testcases: pass ",
+        [ drawStr "Testcases: pass ",
           correctWidget,
-          f " out of ",
+          drawStr " out of ",
           testcasesWidget,
-          f " testcases"
+          drawStr " testcases"
         ]
 
 renderRuntime :: String -> Float -> String -> Widget ResourceName
@@ -80,16 +79,15 @@ renderRuntime statusRuntime runtimePercentile lang = widget
     statusWidget = drawBoldStr statusRuntime
     percentileWidget = drawBoldStr $ show (floatRound runtimePercentile 2) ++ "%"
     langWidget = drawBoldStr lang
-    f = drawStr False
     widget =
       hBox
-        [ f "Runtime: ",
+        [ drawStr "Runtime: ",
           statusWidget,
-          f ", faster than ",
+          drawStr ", faster than ",
           percentileWidget,
-          f " of ",
+          drawStr " of ",
           langWidget,
-          f " online submissions"
+          drawStr " online submissions"
         ]
 
 renderMemory :: String -> Float -> String -> Widget ResourceName
@@ -98,27 +96,25 @@ renderMemory statusMemory memoryPercentile lang = widget
     statusWidget = drawBoldStr statusMemory
     percentileWidget = drawBoldStr $ show (floatRound memoryPercentile 2) ++ "%"
     langWidget = drawBoldStr lang
-    f = drawStr False
     widget =
       hBox
-        [ f "Memory Usage: ",
+        [ drawStr "Memory Usage: ",
           statusWidget,
-          f ", less than ",
+          drawStr ", less than ",
           percentileWidget,
-          f " of ",
+          drawStr " of ",
           langWidget,
-          f " online submissions"
+          drawStr " online submissions"
         ]
 
 renderLastTestcaseError :: String -> String -> String -> Maybe String -> Widget ResourceName
 renderLastTestcaseError lastTestcase actualOutput expectedOutput stdOutput = widget
   where
-    f = drawStr False
-    titleWidget = f "Last Testcase:"
-    inputWidget = f "  Input:    " <+> drawBoldStr lastTestcase
-    outputWidget = f "  Output:   " <+> drawBoldRed actualOutput
-    expectedWidget = f "  Expected: " <+> drawBoldGreen expectedOutput
-    stdOutputWidget = (f "  Print:    " <+>) <$> (drawBoldStr <$> stdOutput)
+    titleWidget = drawStr "Last Testcase:"
+    inputWidget = drawStr "  Input:    " <+> drawBoldStr lastTestcase
+    outputWidget = drawStr "  Output:   " <+> drawBoldRed actualOutput
+    expectedWidget = drawStr "  Expected: " <+> drawBoldGreen expectedOutput
+    stdOutputWidget = (drawStr "  Print:    " <+>) <$> (drawBoldStr <$> stdOutput)
     widget = case stdOutputWidget of
       (Just stdOutputWidget) -> vBox [titleWidget, inputWidget, outputWidget, expectedWidget, stdOutputWidget]
       Nothing -> vBox [titleWidget, inputWidget, outputWidget, expectedWidget]
@@ -126,10 +122,9 @@ renderLastTestcaseError lastTestcase actualOutput expectedOutput stdOutput = wid
 renderLastTestcaseLimit :: String -> Maybe String -> Widget ResourceName
 renderLastTestcaseLimit lastTestcase stdOutput = widget
   where
-    f = drawStr False
-    titleWidget = f "Last Testcase:"
-    inputWidget = f "  Input:    " <+> drawBoldStr lastTestcase
-    stdOutputWidget = (f "  Print:    " <+>) <$> (drawBoldStr <$> stdOutput)
+    titleWidget = drawStr "Last Testcase:"
+    inputWidget = drawStr "  Input:    " <+> drawBoldStr lastTestcase
+    stdOutputWidget = (drawStr "  Print:    " <+>) <$> (drawBoldStr <$> stdOutput)
     widget = case stdOutputWidget of
       (Just stdOutputWidget) -> vBox [titleWidget, inputWidget, stdOutputWidget]
       Nothing -> vBox [titleWidget, inputWidget]
@@ -137,5 +132,4 @@ renderLastTestcaseLimit lastTestcase stdOutput = widget
 renderError :: String -> Widget ResourceName
 renderError errorMessage = widget
   where
-    f = drawRed False
-    widget = f errorMessage
+    widget = drawRed errorMessage

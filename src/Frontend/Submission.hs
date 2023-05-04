@@ -5,15 +5,19 @@ import Backend.Submission (Submission (slug), pid)
 import Brick (Widget)
 import Brick.Widgets.List as BL hiding (reverse)
 import Frontend.State (ResourceName)
-import Frontend.Utils (drawStr)
+import Frontend.Utils (drawSelectedOrUnfocus, drawStr)
 
 renderSubmission :: Bool -> BL.List ResourceName Submission -> Widget ResourceName
-renderSubmission = BL.renderList renderFunc
+renderSubmission hasFocus = BL.renderList renderFunc hasFocus
   where
-    renderFunc = renderTitle
+    renderFunc :: Bool -> Submission -> Widget ResourceName
+    renderFunc = renderTitle hasFocus
 
-renderTitle :: Bool -> Submission -> Widget ResourceName
-renderTitle bool submission = widget
+renderTitle :: Bool -> Bool -> Submission -> Widget ResourceName
+renderTitle hasFocus isSelected submission = widget
   where
-    title = " " ++ (show . pid) submission ++ "." ++ slug submission
-    widget = drawStr bool title
+    title = " " ++ showTitle submission
+    widget = drawSelectedOrUnfocus isSelected hasFocus drawStr title
+
+showTitle :: Submission -> String
+showTitle submission = (show . pid) submission ++ "." ++ slug submission

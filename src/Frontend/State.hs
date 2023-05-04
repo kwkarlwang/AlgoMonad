@@ -1,13 +1,13 @@
 {-# OPTIONS -Wunused-imports #-}
 module Frontend.State where
 
-import Backend.Problem (Problem)
 import Backend.Submission (Submission)
 import Backend.SubmissionDetail (SubmissionReport)
-import Backend.UserInfo (UserInfo)
 import Brick (EventM, Next)
 import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.List as BL
+import Download.ProblemList.State
+import UserInfo.State (UserInfo)
 
 data Focus
   = ListFocus
@@ -39,7 +39,9 @@ data ProblemDetailList = ProblemDetailList
   { pid :: Integer,
     slug :: String,
     content :: String,
-    codeDefinitionList :: BL.List ResourceName (String, String)
+    codeSnippets :: BL.List ResourceName (String, String),
+    likes :: Integer,
+    dislikes :: Integer
   }
   deriving (Show)
 

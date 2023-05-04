@@ -25,17 +25,19 @@ source-repository head
 
 library
   exposed-modules:
+      App
       Backend.Cookie
-      Backend.Problem
       Backend.ProblemDetail
       Backend.Submission
       Backend.SubmissionDetail
-      Backend.UserInfo
       Backend.Utils
-      Frontend.App
+      Download.ProblemDetail.Request
+      Download.ProblemDetail.State
+      Download.ProblemList.Render
+      Download.ProblemList.Request
+      Download.ProblemList.State
       Frontend.Help
       Frontend.KeyBinding
-      Frontend.Problem
       Frontend.ProblemDetail
       Frontend.Render
       Frontend.State
@@ -43,8 +45,10 @@ library
       Frontend.SubmissionDetail
       Frontend.SubmissionReport
       Frontend.Tab
-      Frontend.UserInfo
       Frontend.Utils
+      UserInfo.Render
+      UserInfo.Request
+      UserInfo.State
   other-modules:
       Paths_AlgoMonad
   hs-source-dirs:
