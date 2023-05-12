@@ -27,7 +27,7 @@ langExtensionPair =
     ("python3", ".py"),
     ("ruby", ".rb"),
     ("rust", ".rs"),
-    ("scala", ".scala"),
+    ("scala", ".sc"),
     ("swift", ".swift"),
     ("racket", ".rkt"),
     ("erlang", ".erl"),
