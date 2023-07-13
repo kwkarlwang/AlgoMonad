@@ -72,7 +72,7 @@ darkModeCss =
     ""
     [ "<style>",
       "img { background: #F8F8F2 }",
-      "body { background: #282a36; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }",
+      "body { font-size: 1.75rem; background: #282a36; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; }",
       "pre { white-space: pre-wrap; }",
       "</style>\n"
     ]

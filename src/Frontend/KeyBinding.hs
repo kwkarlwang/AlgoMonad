@@ -1,6 +1,7 @@
 {-# OPTIONS -Wunused-imports #-}
 module Frontend.KeyBinding where
 
+import Backend.Cookie (chromeMacPath, getChromeCookie)
 import qualified Backend.ProblemDetail as PD
 import qualified Backend.Submission as S
 import qualified Backend.SubmissionDetail as SD
@@ -92,6 +93,8 @@ handleGetSubmissions s = do
 
 handleRefresh :: TuiState -> EventM ResourceName TuiState
 handleRefresh s = do
+  -- reacquire the cookie path on every refresh
+  liftIO $ chromeMacPath >>= getChromeCookie
   userInfo <- liftIO getUserInfo
   problems <- liftIO getProblems
   let isCurrentUserPremium = premium userInfo
