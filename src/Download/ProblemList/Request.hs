@@ -20,7 +20,7 @@ import Download.ProblemList.State
 import Network.HTTP.Req
 
 requestProblems :: (FromJSON a) => IO (Req (JsonResponse a))
-requestProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "algorithms") NoReqBody jsonResponse <$> getCredentials
+requestProblems = req GET (https "leetcode.com" /: "api" /: "problems" /: "all") NoReqBody jsonResponse <$> getCredentials
 
 extractProblem :: Value -> Maybe Problem
 extractProblem value = do
